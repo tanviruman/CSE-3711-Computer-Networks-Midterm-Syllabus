@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSE 3711 · CT Guide — Circuit & Packet Switching Math</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script>
+  window.MathJax = {
+    tex: { inlineMath: [['\\(','\\)']], displayMath: [['\\[','\\]']] },
+    svg: { fontCache: 'global' }
+  };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.min.js"></script>
+<style>
+:root{
+  --bg:#0a0d13;
+  --bg-panel:#12161f;
+  --bg-panel-2:#161c28;
+  --border:#232b3a;
+  --border-soft:#1a2130;
+  --text:#e9edf4;
+  --muted:#8a94a8;
+  --muted-2:#5f6a80;
+  --accent:#e0a94c;
+  --accent-soft:#3a3120;
+  --teal:#4fc3a1;
+  --teal-soft:#15302a;
+  --blue:#5fa8ee;
+  --danger:#e2665c;
+  --danger-soft:#2e1a19;
+  --radius:12px;
+  --font-head:'Sora',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  line-height:1.65;
+  font-size:15.5px;
+}
+
+/* ---------- progress bar ---------- */
+#progress{
+  position:fixed; top:0; left:0; height:3px; width:0%;
+  background:linear-gradient(90deg, var(--accent), var(--teal));
+  z-index:1000; transition:width .08s linear;
+}
+
+/* ---------- layout ---------- */
+.wrap{ display:flex; min-height:100vh; }
+
+/* ---------- sidebar ---------- */
+#sidebar{
+  width:280px; flex-shrink:0;
+  background:var(--bg-panel);
+  border-right:1px solid var(--border);
+  position:fixed; top:0; left:0; bottom:0;
+  overflow-y:auto;
+  padding:22px 0 40px;
+  z-index:100;
+}
+#sidebar::-webkit-scrollbar{width:6px;}
+#sidebar::-webkit-scrollbar-thumb{background:var(--border); border-radius:4px;}
+
+.brand{
+  padding:0 22px 18px;
+  border-bottom:1px solid var(--border-soft);
+  margin-bottom:14px;
+}
+.brand .tag{
+  font-family:var(--font-mono); font-size:11px; letter-spacing:1.5px;
+  color:var(--accent); text-transform:uppercase; font-weight:600;
+}
+.brand h1{
+  font-family:var(--font-head); font-size:19px; font-weight:700;
+  margin-top:6px; color:var(--text); line-height:1.3;
+}
+.brand p{ font-size:12.5px; color:var(--muted); margin-top:6px; }
+
+nav.toc{ padding:6px 12px; }
+nav.toc .group-label{
+  font-size:10.5px; text-transform:uppercase; letter-spacing:1.2px;
+  color:var(--muted-2); font-weight:700; padding:16px 10px 6px;
+}
+nav.toc a{
+  display:block; padding:7px 10px; margin:1px 0;
+  color:var(--muted); text-decoration:none; font-size:13.3px;
+  border-radius:8px; border-left:2px solid transparent;
+  transition:background .15s, color .15s, border-color .15s;
+}
+nav.toc a:hover{ background:var(--bg-panel-2); color:var(--text); }
+nav.toc a.active{
+  background:var(--accent-soft); color:var(--accent);
+  border-left:2px solid var(--accent); font-weight:600;
+}
+nav.toc a .num{ font-family:var(--font-mono); color:var(--muted-2); margin-right:6px; font-size:11.5px;}
+
+/* ---------- main ---------- */
+main{
+  margin-left:280px; flex:1; min-width:0;
+  padding:38px 46px 100px;
+  max-width:900px;
+}
+@media (max-width:900px){
+  #sidebar{ transform:translateX(-100%); transition:transform .2s; }
+  #sidebar.open{ transform:translateX(0); }
+  main{ margin-left:0; padding:24px 18px 90px; }
+  #menuBtn{ display:flex !important; }
+}
+
+#menuBtn{
+  display:none; position:fixed; top:14px; left:14px; z-index:200;
+  width:40px; height:40px; border-radius:10px; background:var(--bg-panel);
+  border:1px solid var(--border); color:var(--text); align-items:center; justify-content:center;
+  cursor:pointer;
+}
+
+header.hero{
+  padding-bottom:28px; margin-bottom:34px; border-bottom:1px solid var(--border-soft);
+}
+header.hero .badge{
+  display:inline-block; font-family:var(--font-mono); font-size:11.5px;
+  color:var(--teal); background:var(--teal-soft); padding:4px 10px;
+  border-radius:20px; margin-bottom:14px; letter-spacing:.5px;
+}
+header.hero h1{
+  font-family:var(--font-head); font-size:32px; font-weight:800;
+  line-height:1.2; margin-bottom:10px;
+}
+header.hero p.sub{ color:var(--muted); font-size:15px; max-width:640px; }
+
+.scope-box{
+  margin-top:20px; background:var(--bg-panel); border:1px solid var(--border);
+  border-radius:var(--radius); padding:16px 18px; display:flex; gap:14px;
+}
+.scope-box.in{ border-left:3px solid var(--teal); }
+.scope-box .icon{ font-size:20px; }
+.scope-box b{ color:var(--text); }
+.scope-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-top:16px;}
+@media(max-width:640px){ .scope-grid{grid-template-columns:1fr;} }
+
+section{ margin-bottom:52px; scroll-margin-top:24px; }
+section h2{
+  font-family:var(--font-head); font-size:23px; font-weight:700;
+  margin-bottom:6px; display:flex; align-items:center; gap:10px;
+}
+section h2 .idx{
+  font-family:var(--font-mono); font-size:14px; color:var(--accent);
+  background:var(--accent-soft); width:30px; height:30px; border-radius:8px;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0;
+}
+section > p.lead{ color:var(--muted); margin:10px 0 20px; max-width:680px; }
+h3{ font-family:var(--font-head); font-size:16.5px; font-weight:700; margin:26px 0 10px; color:var(--text); }
+h4{ font-size:14px; font-weight:700; margin:16px 0 8px; color:var(--accent); }
+p{ margin-bottom:12px; color:#c7cee0; }
+ul, ol{ margin:8px 0 14px 22px; color:#c7cee0; }
+li{ margin-bottom:6px; }
+strong{ color:var(--text); font-weight:600; }
+code{
+  font-family:var(--font-mono); background:var(--bg-panel-2); padding:2px 6px;
+  border-radius:5px; font-size:13px; color:var(--accent);
+}
+
+/* ---------- formula card ---------- */
+.formula-card{
+  background:var(--bg-panel); border:1px solid var(--border);
+  border-radius:var(--radius); padding:18px 20px; margin:16px 0;
+}
+.formula-card .flabel{
+  font-family:var(--font-mono); font-size:11px; text-transform:uppercase;
+  letter-spacing:1px; color:var(--muted-2); margin-bottom:8px;
+}
+.formula-card .fmath{ font-size:16px; overflow-x:auto; }
+.formula-card .fnote{ margin-top:10px; font-size:13px; color:var(--muted); }
+.formula-card.gold{ border-left:3px solid var(--accent); }
+.formula-card.teal{ border-left:3px solid var(--teal); }
+
+/* ---------- key/value legend ---------- */
+.legend{
+  display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr));
+  gap:8px 18px; margin:14px 0 18px; font-size:13.3px;
+}
+.legend div{ display:flex; gap:8px; align-items:baseline; }
+.legend .k{ font-family:var(--font-mono); color:var(--accent); min-width:20px; font-weight:600;}
+.legend .v{ color:var(--muted); }
+
+/* ---------- worked example ---------- */
+.example{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius);
+  margin:18px 0; overflow:hidden;
+}
+.example .ex-head{
+  padding:14px 18px; background:var(--bg-panel-2); display:flex;
+  justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;
+}
+.example .ex-head .ex-title{ font-weight:700; font-size:14.5px; color:var(--text); }
+.example .ex-head .ex-src{ font-family:var(--font-mono); font-size:11px; color:var(--muted-2); }
+.example .ex-body{ padding:16px 18px; }
+.example .given{
+  background:var(--bg); border:1px solid var(--border-soft); border-radius:8px;
+  padding:12px 14px; margin-bottom:14px; font-size:13.5px;
+}
+.example .given b{ color:var(--teal); }
+.step{ display:flex; gap:12px; margin-bottom:14px; align-items:flex-start; }
+.step .stepnum{
+  font-family:var(--font-mono); font-size:11.5px; font-weight:700; color:var(--bg);
+  background:var(--accent); width:22px; height:22px; border-radius:50%;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; margin-top:2px;
+}
+.step .stepcontent{ flex:1; min-width:0; overflow-x:auto; }
+.step .stepcontent .slabel{ font-size:13px; color:var(--muted); margin-bottom:4px;}
+.answer-box{
+  background:var(--teal-soft); border:1px solid #1f4238; border-radius:8px;
+  padding:12px 16px; margin-top:12px; display:flex; gap:10px; align-items:center;
+}
+.answer-box .tick{ color:var(--teal); font-size:18px; }
+.answer-box b{ color:var(--teal); }
+
+/* ---------- practice / collapsible ---------- */
+details.practice{
+  background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius);
+  margin:14px 0; padding:0; overflow:hidden;
+}
+details.practice summary{
+  cursor:pointer; padding:14px 18px; font-weight:600; list-style:none;
+  display:flex; justify-content:space-between; align-items:center; font-size:14px;
+}
+details.practice summary::-webkit-details-marker{ display:none; }
+details.practice summary .qtag{
+  font-family:var(--font-mono); font-size:11px; color:var(--accent);
+  background:var(--accent-soft); padding:3px 9px; border-radius:12px; margin-right:10px;
+}
+details.practice summary .chev{ transition:transform .2s; color:var(--muted); }
+details.practice[open] summary .chev{ transform:rotate(90deg); }
+details.practice .sol{
+  padding:0 18px 18px; border-top:1px solid var(--border-soft); margin-top:2px; padding-top:14px;
+}
+
+/* ---------- comparison table ---------- */
+table{ width:100%; border-collapse:collapse; margin:16px 0; font-size:13.5px; }
+th, td{ padding:10px 14px; border:1px solid var(--border); text-align:left; }
+th{ background:var(--bg-panel-2); color:var(--text); font-weight:700; font-size:12.5px; text-transform:uppercase; letter-spacing:.4px;}
+td{ color:#c7cee0; background:var(--bg-panel); }
+tr:hover td{ background:var(--bg-panel-2); }
+
+/* ---------- callouts ---------- */
+.callout{ border-radius:var(--radius); padding:14px 18px; margin:16px 0; display:flex; gap:12px; }
+.callout .cico{ font-size:18px; flex-shrink:0; }
+.callout.tip{ background:var(--teal-soft); border:1px solid #1f4238; }
+.callout.warn{ background:var(--danger-soft); border:1px solid #4a2523; }
+.callout.info{ background:#182236; border:1px solid #24344f; }
+.callout b{ display:block; margin-bottom:2px; }
+.callout.tip b{ color:var(--teal); }
+.callout.warn b{ color:var(--danger); }
+.callout.info b{ color:var(--blue); }
+
+/* ---------- unit chips ---------- */
+.chip-row{ display:flex; flex-wrap:wrap; gap:8px; margin:14px 0; }
+.chip{
+  font-family:var(--font-mono); font-size:12.5px; background:var(--bg-panel-2);
+  border:1px solid var(--border); padding:6px 12px; border-radius:20px; color:var(--text);
+}
+.chip b{ color:var(--accent); }
+
+/* ---------- cheat sheet grid ---------- */
+.cheat-grid{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+@media(max-width:700px){ .cheat-grid{ grid-template-columns:1fr; } }
+.cheat-card{ background:var(--bg-panel); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px;}
+.cheat-card h4{ margin-top:0; }
+
+footer{
+  border-top:1px solid var(--border-soft); margin-top:60px; padding-top:24px;
+  color:var(--muted-2); font-size:12.5px; text-align:center;
+}
+
+::selection{ background:var(--accent); color:#000; }
+</style>
+</head>
+<body>
+
+<div id="progress"></div>
+<div id="menuBtn" onclick="document.getElementById('sidebar').classList.toggle('open')">☰</div>
+
+<div class="wrap">
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="tag">CSE 3711 · Computer Networks</div>
+      <h1>CT Exam Guide<br>Circuit & Packet Switching</h1>
+      <p>Class 03 – 04 Math Problems · UIU</p>
+    </div>
+    <nav class="toc" id="tocNav">
+      <div class="group-label">Start Here</div>
+      <a href="#scope"><span class="num">00</span>Syllabus Scope</a>
+      <a href="#format"><span class="num">01</span>CT Exam Format</a>
+
+      <div class="group-label">Circuit Switching</div>
+      <a href="#circuit-basics"><span class="num">02</span>Core Formula</a>
+      <a href="#tdm"><span class="num">03</span>TDM / Circuit Setup</a>
+
+      <div class="group-label">Packet Switching</div>
+      <a href="#packet-prob"><span class="num">04</span>Binomial Probability</a>
+      <a href="#specific-vs-any"><span class="num">05</span>Specific vs "Any" User ⚠</a>
+      <a href="#cs-vs-ps"><span class="num">06</span>Circuit vs Packet</a>
+
+      <div class="group-label">Delay & Throughput</div>
+      <a href="#four-delays"><span class="num">07</span>Four Sources of Delay</a>
+      <a href="#queuing"><span class="num">08</span>Queuing Delay Formula</a>
+      <a href="#endtoend"><span class="num">09</span>End-to-End (Multi-hop)</a>
+      <a href="#throughput"><span class="num">10</span>Throughput & Bottleneck</a>
+
+      <div class="group-label">Practice</div>
+      <a href="#worked-bank"><span class="num">11</span>Worked Example Bank</a>
+      <a href="#self-test"><span class="num">12</span>Self-Test Problems</a>
+      <a href="#mistakes"><span class="num">13</span>Common Mistakes</a>
+      <a href="#cheatsheet"><span class="num">14</span>Formula Cheat-Sheet</a>
+    </nav>
+  </aside>
+
+  <main>
+    <header class="hero">
+      <span class="badge">● Class Test Prep — Full Marks Target</span>
+      <h1>Circuit &amp; Packet Switching — Mathematical Problems</h1>
+      <p class="sub">A focused, exam-only guide built from your Class 03 notes, the CSE 323 workbook exercises, and an actual past CSE 3711 Class Test (with solutions). Everything outside this syllabus scope has been left out.</p>
+
+      <div id="scope" class="scope-box in">
+        <div class="icon">✅</div>
+        <div>
+          <b>In scope (Class 03 &amp; 04):</b> Circuit-switching capacity math · TDM allocation · Packet-switching probability (binomial distribution) · Circuit vs. packet comparison · Four sources of delay · Queuing delay formula · Multi-hop end-to-end delay · Throughput &amp; bottleneck links.
+        </div>
+      </div>
+      <div class="scope-box" style="border-left:3px solid var(--danger); margin-top:10px;">
+        <div class="icon">🚫</div>
+        <div><b>Explicitly excluded:</b> The Caravan Analogy (toll-booth exercise, Ex. 7). If it shows up in a source PDF below, skip it — it is <b>not</b> on your syllabus.</div>
+      </div>
+    </header>
+
+    <!-- ================= FORMAT ================= -->
+    <section id="format">
+      <h2><span class="idx">01</span>What the CT Actually Looks Like</h2>
+      <p class="lead">Based on a real CSE 3711 Class Test 01 (15 min, 20 marks) you were given as reference.</p>
+
+      <div class="scope-grid">
+        <div class="cheat-card">
+          <h4>Part A — MCQ (5 × 1 = 5 marks)</h4>
+          <ul>
+            <li>Which delay = waiting at router due to congestion? → <b>Queuing delay</b></li>
+            <li>What determines transmission delay? → <b>Length of the packet</b></li>
+            <li>What must be set up before circuit-switched transmission? → <b>Dedicated path</b></li>
+            <li>Circuit vs packet switching — resource allocation difference</li>
+            <li>Which claim about packet vs circuit switching is true? → usually <b>"packet switching can support more users"</b></li>
+          </ul>
+        </div>
+        <div class="cheat-card">
+          <h4>Part B — Short Answers (3 × 5 = 15 marks)</h4>
+          <ul>
+            <li><b>Q1:</b> Binomial probability — "more than N users transmitting" (N is often tied to your Student ID last 2 digits — personalize it!)</li>
+            <li><b>Q2:</b> End-to-end delay across a 2–3 link path with processing + queuing + transmission + propagation delay</li>
+            <li><b>Q3:</b> Pure propagation delay calculation (watch for irrelevant extra data in the question — it's a distractor)</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="cico">⚠️</div>
+        <div><b>ID-based personalization</b>Many CT questions define <code>N = last two digits of your Student ID</code>. Practice plugging <em>your own</em> ID digits into every formula below — don't just memorize one numeric answer.</div>
+      </div>
+    </section>
+
+    <!-- ================= CIRCUIT SWITCHING ================= -->
+    <section id="circuit-basics">
+      <h2><span class="idx">02</span>Circuit Switching — Core Formula</h2>
+      <p class="lead">Circuit switching reserves a fixed, dedicated slice of bandwidth for every user for the <em>entire</em> session — whether they're actively sending data or not.</p>
+
+      <div class="formula-card gold">
+        <div class="flabel">Maximum users supported (circuit switching)</div>
+        <div class="fmath">\[ N_{cs} = \dfrac{R_{link}}{R_{user}} \]</div>
+        <div class="fnote">Simple division — no probability involved. Each user gets a guaranteed, permanent slice.</div>
+      </div>
+
+      <div class="legend">
+        <div><span class="k">R<sub>link</sub></span><span class="v">total link/channel capacity</span></div>
+        <div><span class="k">R<sub>user</sub></span><span class="v">bandwidth required by one user</span></div>
+        <div><span class="k">N<sub>cs</sub></span><span class="v">max circuit-switched users (always round <b>down</b>)</span></div>
+      </div>
+
+      <div class="callout tip">
+        <div class="cico">💡</div>
+        <div><b>Always convert units first.</b> Gbps → Mbps → Kbps → bps. A single missed ×1000 is the #1 way marks are lost on this question.</div>
+      </div>
+    </section>
+
+    <section id="tdm">
+      <h2><span class="idx">03</span>TDM Circuit Setup & Transmission Time</h2>
+      <p class="lead">When circuit switching uses Time Division Multiplexing (TDM), the link's total capacity is sliced into fixed periodic time-slots — one slot per active circuit.</p>
+
+      <div class="formula-card teal">
+        <div class="flabel">Bandwidth allocated per TDM slot</div>
+        <div class="fmath">\[ R_{slot} = \dfrac{R_{link}}{\text{slots per second}} \]</div>
+      </div>
+      <div class="formula-card teal">
+        <div class="flabel">Total time to send a file over a circuit</div>
+        <div class="fmath">\[ T_{total} = T_{setup} + \dfrac{\text{File size (bits)}}{R_{slot}} \]</div>
+        <div class="fnote">Don't forget <code>T_setup</code> — the "establish end-to-end circuit" time given in the question. It's easy to forget and lose a mark.</div>
+      </div>
+    </section>
+
+    <!-- ================= PACKET SWITCHING PROBABILITY ================= -->
+    <section id="packet-prob">
+      <h2><span class="idx">04</span>Packet Switching — Binomial Probability</h2>
+      <p class="lead">In packet switching, users share the link on-demand. Each user is only "active" (transmitting) a fraction <code>p</code> of the time. This turns every question into a <b>binomial distribution</b> problem.</p>
+
+      <div class="formula-card gold">
+        <div class="flabel">Binomial probability — exactly <em>k</em> of <em>n</em> users transmitting</div>
+        <div class="fmath">\[ P(X = k) = \binom{n}{k}\, p^{k}\,(1-p)^{n-k} \]</div>
+      </div>
+
+      <div class="legend">
+        <div><span class="k">n</span><span class="v">total number of users (packet-switched)</span></div>
+        <div><span class="k">p</span><span class="v">probability a single user is transmitting (its "% active time")</span></div>
+        <div><span class="k">k</span><span class="v">number of users transmitting simultaneously</span></div>
+        <div><span class="k">1−p</span><span class="v">probability a user is idle</span></div>
+      </div>
+
+      <h3>Cumulative variants — read the question wording carefully</h3>
+      <table>
+        <tr><th>Phrase in question</th><th>What to compute</th></tr>
+        <tr><td>"exactly k users transmitting"</td><td>\( P(X=k) \)</td></tr>
+        <tr><td>"more than k" / "greater than k"</td><td>\( \displaystyle\sum_{i=k+1}^{n} P(X=i) \)</td></tr>
+        <tr><td>"at least k" / "k or more"</td><td>\( \displaystyle\sum_{i=k}^{n} P(X=i) \)</td></tr>
+        <tr><td>"fewer than k" / "less than k"</td><td>\( \displaystyle\sum_{i=0}^{k-1} P(X=i) \)</td></tr>
+        <tr><td>"at most k" / "k or fewer"</td><td>\( \displaystyle\sum_{i=0}^{k} P(X=i) \)</td></tr>
+        <tr><td>"all n users transmitting"</td><td>\( P(X=n)=p^{n} \)</td></tr>
+      </table>
+
+      <div class="callout warn">
+        <div class="cico">⚠️</div>
+        <div><b>Set the bound correctly.</b> "More than N" starts summing at <code>i = N+1</code>, not <code>i = N</code>. This single off-by-one mistake is the most common way this question loses marks in the CT.</div>
+      </div>
+    </section>
+
+    <section id="specific-vs-any">
+      <h2><span class="idx">05</span>The Trap Question: "A Specific User" vs "Any One User"</h2>
+      <p class="lead">This exact distinction appeared in your Class 03 notes as a worked example — it is a favorite CT trick.</p>
+
+      <div class="formula-card gold">
+        <div class="flabel">Case A — ONE particular, named/given user is active, all others idle</div>
+        <div class="fmath">\[ P = p \,(1-p)^{\,n-1} \]</div>
+        <div class="fnote">No combination factor — you've fixed <em>which</em> user, so there's only one arrangement.</div>
+      </div>
+
+      <div class="formula-card teal">
+        <div class="flabel">Case B — ANY one (unspecified) user is active, all others idle</div>
+        <div class="fmath">\[ P = \binom{n}{1}\, p\,(1-p)^{\,n-1} = n \cdot p\,(1-p)^{\,n-1} \]</div>
+        <div class="fnote">Now you multiply by <code>n</code> — because it could be <em>any</em> of the n users playing that role.</div>
+      </div>
+
+      <div class="callout info">
+        <div class="cico">🔎</div>
+        <div><b>Mini illustration (n = 3, p = 0.2)</b>There are 3 possible ways exactly one specific slot is "active": (active, idle, idle), (idle, active, idle), (idle, idle, active). Each individual arrangement has probability <code>0.2 × 0.8 × 0.8 = 0.128</code>. Summing all 3 arrangements gives <code>3 × 0.128 = 0.384</code> — which is exactly \( \binom{3}{1}(0.2)^1(0.8)^2 \). This is the same logic behind <code>C(n,k)</code> in the full binomial formula.</div>
+      </div>
+    </section>
+
+    <section id="cs-vs-ps">
+      <h2><span class="idx">06</span>Circuit Switching vs Packet Switching — Comparison</h2>
+      <table>
+        <tr><th>Aspect</th><th>Circuit Switching</th><th>Packet Switching</th></tr>
+        <tr><td>Resource allocation</td><td>Dedicated, reserved for entire call</td><td>Shared on-demand</td></tr>
+        <tr><td>Setup</td><td>Requires call/circuit setup first</td><td>No setup — send immediately</td></tr>
+        <tr><td>Max simultaneous users</td><td>Fixed, low: \(R_{link}/R_{user}\)</td><td>Much higher — statistical multiplexing</td></tr>
+        <tr><td>Idle-time waste</td><td>Reserved bandwidth wasted if user idle</td><td>No waste — idle users free up capacity for others</td></tr>
+        <tr><td>Queuing / delay</td><td>None (guaranteed channel)</td><td>Possible, if too many users active at once</td></tr>
+        <tr><td>Best for</td><td>Constant-rate traffic (e.g. traditional telephony)</td><td>Bursty data traffic (e.g. web, email)</td></tr>
+        <tr><td>Guarantee</td><td>Circuit-like guaranteed performance</td><td>Best-effort — small risk of congestion</td></tr>
+      </table>
+      <div class="callout tip">
+        <div class="cico">💡</div>
+        <div><b>Exam one-liner:</b> "Packet switching supports far more users than circuit switching because it exploits the fact that users are rarely all active simultaneously — the small probability of congestion is traded for large gains in capacity efficiency."</div>
+      </div>
+    </section>
+
+    <!-- ================= DELAY ================= -->
+    <section id="four-delays">
+      <h2><span class="idx">07</span>The Four Sources of Packet Delay</h2>
+      <div class="formula-card gold">
+        <div class="flabel">Total nodal delay at one router/hop</div>
+        <div class="fmath">\[ d_{nodal} = d_{proc} + d_{queue} + d_{trans} + d_{prop} \]</div>
+      </div>
+
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <h4>d<sub>proc</sub> — Processing delay</h4>
+          <p style="margin:0;font-size:13.5px;">Time for router to check bit errors, determine output link. Usually <b>given directly</b> in the question (e.g. "1 ms per router"). Typically microseconds in reality.</p>
+        </div>
+        <div class="cheat-card">
+          <h4>d<sub>queue</sub> — Queuing delay</h4>
+          <p style="margin:0;font-size:13.5px;">Time waiting in the router's buffer before transmission. Depends on congestion — see the dedicated formula below.</p>
+        </div>
+        <div class="cheat-card">
+          <h4>d<sub>trans</sub> — Transmission delay</h4>
+          <div class="fmath" style="font-size:14px;">\[ d_{trans} = \dfrac{L}{R} \]</div>
+          <p style="margin:0;font-size:13.5px;"><code>L</code> = packet length in <b>bits</b>, <code>R</code> = link rate in bps. Time to <em>push</em> all bits onto the link.</p>
+        </div>
+        <div class="cheat-card">
+          <h4>d<sub>prop</sub> — Propagation delay</h4>
+          <div class="fmath" style="font-size:14px;">\[ d_{prop} = \dfrac{d}{s} \]</div>
+          <p style="margin:0;font-size:13.5px;"><code>d</code> = physical link length (m), <code>s</code> = propagation speed (m/s, usually ~2–3×10⁸). Time for one bit to <em>travel</em> the wire.</p>
+        </div>
+      </div>
+
+      <div class="callout warn">
+        <div class="cico">⚠️</div>
+        <div><b>Never confuse d<sub>trans</sub> and d<sub>prop</sub>.</b> Transmission depends on packet size and rate (how fast you can push bits out); propagation depends on distance and the speed of light in the medium (how long a single bit takes to physically arrive). They're independent and both must be added.</div>
+      </div>
+    </section>
+
+    <section id="queuing">
+      <h2><span class="idx">08</span>Queuing Delay — Exact Formula</h2>
+      <p class="lead">Used when the question describes a packet arriving behind others already in the router's buffer.</p>
+
+      <div class="formula-card gold">
+        <div class="flabel">General queuing delay</div>
+        <div class="fmath">\[ d_{queue} = \dfrac{L - x}{R} \;+\; n \cdot \dfrac{L}{R} \]</div>
+        <div class="fnote">First term = time to finish the packet <em>currently</em> being transmitted (already <code>x</code> bits done). Second term = full transmission time for each of the <code>n</code> packets waiting ahead of you in the queue.</div>
+      </div>
+      <div class="legend">
+        <div><span class="k">L</span><span class="v">length of each packet (bits) — assume equal length unless stated</span></div>
+        <div><span class="k">x</span><span class="v">bits of the currently-transmitting packet already sent</span></div>
+        <div><span class="k">n</span><span class="v">number of full packets already waiting in queue</span></div>
+        <div><span class="k">R</span><span class="v">link transmission rate (bps)</span></div>
+      </div>
+    </section>
+
+    <section id="endtoend">
+      <h2><span class="idx">09</span>End-to-End Delay — Multi-Hop Paths</h2>
+      <p class="lead">The most common CT-style question: a packet travels through 2–3 links, possibly via store-and-forward routers.</p>
+
+      <div class="formula-card gold">
+        <div class="flabel">General end-to-end delay template</div>
+        <div class="fmath">\[ D_{end\text{-}to\text{-}end} = \sum_{\text{each link } i} \left( d_{trans,i} + d_{prop,i} \right) \;+\; \sum_{\text{each node before a link}} \left( d_{proc} + d_{queue} \right) \]</div>
+        <div class="fnote">"Store-and-forward" means the <b>entire</b> packet must arrive at a router before any bit of it can be sent on the next link — so transmission delay is paid again at every link, at that link's own rate.</div>
+      </div>
+
+      <div class="callout tip">
+        <div class="cico">💡</div>
+        <div><b>Build a table before adding anything.</b> For each link, write down <code>L, R, d, s</code>, compute <code>d_trans</code> and <code>d_prop</code> separately, then add processing/queuing per node. This avoids the #1 error: mixing up which rate/distance belongs to which link.</div>
+      </div>
+    </section>
+
+    <section id="throughput">
+      <h2><span class="idx">10</span>Throughput & the Bottleneck Link</h2>
+      <div class="formula-card gold">
+        <div class="flabel">End-to-end throughput of a single flow across a path</div>
+        <div class="fmath">\[ Throughput = \min(R_1, R_2, \dots, R_n) \]</div>
+        <div class="fnote">The <b>bottleneck link</b> is whichever link has the lowest rate — it caps everything downstream, no matter how fast the other links are.</div>
+      </div>
+      <div class="formula-card teal">
+        <div class="flabel">Time to transfer a file</div>
+        <div class="fmath">\[ Time = \dfrac{\text{File size (bits)}}{\text{Throughput (bps)}} \]</div>
+      </div>
+    </section>
+
+    <!-- ================= WORKED EXAMPLES ================= -->
+    <section id="worked-bank">
+      <h2><span class="idx">11</span>Worked Example Bank</h2>
+      <p class="lead">Every number below is fully computed — trace each step, then re-derive it yourself with the numbers cover up.</p>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 1 — Circuit Switching Capacity</span><span class="ex-src">Class 03 Notes · Exercise 5</span></div>
+        <div class="ex-body">
+          <div class="given">Link capacity = <b>2 Mbps</b>. Each user transmits at 1 Mbps when active.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Apply the formula</div>\( N_{cs} = R_{link}/R_{user} = 2\text{ Mbps} / 1\text{ Mbps} \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>N<sub>cs</sub> = 2 users</b> can be supported under circuit switching.</div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 2 — Circuit Switching, Larger Link</span><span class="ex-src">Workbook · Exercise 6(a)</span></div>
+        <div class="ex-body">
+          <div class="given">Link capacity = <b>200 Mbps</b>. Each user requires <b>25 Mbps</b>.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Divide</div>\( N_{cs} = 200/25 = 8 \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>N<sub>cs</sub> = 8 users.</b> Note: with 15 packet-switching users given later in this exercise, 15 &gt; 8 — circuit switching cannot support them all simultaneously; packet switching can.</div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 3 — TDM Circuit Transmission Time</span><span class="ex-src">Class 03 Notes · Exercise 4 (solved)</span></div>
+        <div class="ex-body">
+          <div class="given">File = <b>640,000 bits</b>. Link = <b>1.536 Mbps</b>, TDM with <b>24 slots/sec</b>. Circuit setup time = <b>500 ms</b>.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Bandwidth per slot</div>\( R_{slot} = 1{,}536{,}000 / 24 = 64{,}000 \text{ bps} \)</div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stepcontent"><div class="slabel">Transmission time</div>\( 640{,}000 / 64{,}000 = 10\text{ s} \)</div></div>
+          <div class="step"><div class="stepnum">3</div><div class="stepcontent"><div class="slabel">Add setup time</div>\( T_{total} = 10\text{ s} + 0.5\text{ s} \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>T<sub>total</sub> = 10.5 seconds</b></div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 4 — "Specific User" Probability</span><span class="ex-src">Workbook · Exercise 6(c)</span></div>
+        <div class="ex-body">
+          <div class="given">n = <b>15</b> users, p = <b>0.2</b> (each active 20% of the time). Find P(one specific user transmitting, all 14 others idle).</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">No combination factor — user identity is fixed</div>\( P = p\,(1-p)^{14} = 0.2 \times 0.8^{14} \)</div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stepcontent"><div class="slabel">Compute</div>\( 0.8^{14} \approx 0.04398 \)  →  \( P = 0.2 \times 0.04398 \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>P ≈ 0.0088 (0.88%)</b></div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 5 — All Users Transmitting Simultaneously</span><span class="ex-src">Workbook · Exercise 6(d)</span></div>
+        <div class="ex-body">
+          <div class="given">n = 15, p = 0.2. Find P(all 15 transmitting at once).</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Every user must be active</div>\( P(X=15) = p^{15} = 0.2^{15} \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>P ≈ 3.28 × 10⁻¹¹</b> — vanishingly small.</div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 6 — "More Than k" Cumulative Probability</span><span class="ex-src">Workbook · Exercise 6(e) — the classic CT-style question</span></div>
+        <div class="ex-body">
+          <div class="given">n = 15, p = 0.2, circuit-switching capacity = 8. Find P(more than 8 users transmitting simultaneously).</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Set up the sum — starts at i = 9 (NOT 8)</div>\( P(X>8) = \displaystyle\sum_{i=9}^{15} \binom{15}{i}(0.2)^i(0.8)^{15-i} \)</div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stepcontent"><div class="slabel">Compute each term (i = 9 … 15) and add</div>
+          i=9: 0.000672 &nbsp;·&nbsp; i=10: 0.000101 &nbsp;·&nbsp; i=11: 0.0000115 &nbsp;·&nbsp; i=12: 0.00000095 &nbsp;·&nbsp; i≥13: negligible</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>P ≈ 0.00078 (≈ 0.078%)</b> — under 0.1% chance the 8-circuit capacity is ever exceeded, even with 15 packet-switched users sharing the link. This is <em>why</em> packet switching wins here.</div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 7 — Queuing Delay for a Waiting Packet</span><span class="ex-src">Workbook · Knowledge Test 2, Q5</span></div>
+        <div class="ex-body">
+          <div class="given">One packet is halfway transmitted, <b>4 packets</b> already waiting. All packets = 1,500 bytes. Link rate = <b>2 Mbps</b>.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Convert &amp; find L</div>L = 1500 × 8 = 12,000 bits. Remaining of current packet, x = L/2 = 6,000 bits.</div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stepcontent"><div class="slabel">Time to finish current packet</div>\( (12000-6000)/2{,}000{,}000 = 0.003\text{ s} = 3\text{ ms} \)</div></div>
+          <div class="step"><div class="stepnum">3</div><div class="stepcontent"><div class="slabel">Time for 4 waiting packets</div>\( 4 \times (12000/2{,}000{,}000) = 4 \times 0.006 = 0.024\text{ s} = 24\text{ ms} \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>d<sub>queue</sub> = 3 + 24 = 27 ms</b></div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 8 — End-to-End Delay, 2 Links + 1 Router</span><span class="ex-src">Mid-term Q1(d), Fig. 1 — fully worked</span></div>
+        <div class="ex-body">
+          <div class="given">Frame = 1500 bytes. R1 = 100 Mbps (D1 = 10 m), R2 = 1 Gbps (D2 = 1 km). Propagation speed = 1.5×10⁸ m/s. Router processing = 1 ms. No queuing.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Link 1 — transmission &amp; propagation</div>
+            \( d_{trans1} = \dfrac{1500\times8}{100\times10^6} = 0.12\text{ ms} \) &nbsp;&nbsp; \( d_{prop1} = \dfrac{10}{1.5\times10^8} \approx 0.0000667\text{ ms} \)
+          </div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stepcontent"><div class="slabel">Router processing</div>\( d_{proc} = 1\text{ ms} \)</div></div>
+          <div class="step"><div class="stepnum">3</div><div class="stepcontent"><div class="slabel">Link 2 — transmission &amp; propagation</div>
+            \( d_{trans2} = \dfrac{1500\times8}{1\times10^9} = 0.012\text{ ms} \) &nbsp;&nbsp; \( d_{prop2} = \dfrac{1000}{1.5\times10^8} \approx 0.00667\text{ ms} \)
+          </div></div>
+          <div class="step"><div class="stepnum">4</div><div class="stepcontent"><div class="slabel">Sum everything</div>\( 0.12 + 0.0000667 + 1 + 0.012 + 0.00667 \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>D<sub>total</sub> ≈ 1.139 ms.</b> Bottleneck link = R1 (100 Mbps, the slower of the two) → single-user throughput = <b>100 Mbps</b>.</div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 9 — 3-Link Path (no processing/queuing)</span><span class="ex-src">Workbook · Exercise 8</span></div>
+        <div class="ex-body">
+          <div class="given">Packet = 16,000 bits. Link 1: 1000 Mbps / 2 km · Link 2: 100 Mbps / 3 km · Link 3: 10 Mbps / 500 km. Propagation speed = 3×10⁸ m/s. Ignore processing &amp; queuing.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Link 1</div>\( d_{trans}=16000/10^9=0.016\text{ms} \)&nbsp;&nbsp;\( d_{prop}=2000/3\times10^8\approx0.00667\text{ms} \)</div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stepcontent"><div class="slabel">Link 2</div>\( d_{trans}=16000/10^8=0.16\text{ms} \)&nbsp;&nbsp;\( d_{prop}=3000/3\times10^8=0.01\text{ms} \)</div></div>
+          <div class="step"><div class="stepnum">3</div><div class="stepcontent"><div class="slabel">Link 3</div>\( d_{trans}=16000/10^7=1.6\text{ms} \)&nbsp;&nbsp;\( d_{prop}=500000/3\times10^8\approx1.667\text{ms} \)</div></div>
+          <div class="step"><div class="stepnum">4</div><div class="stepcontent"><div class="slabel">Sum all six values</div>0.016+0.00667+0.16+0.01+1.6+1.667</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>D<sub>total</sub> ≈ 3.46 ms</b></div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 10 — Throughput &amp; Bottleneck, Full File Transfer</span><span class="ex-src">Workbook · Exercise 10</span></div>
+        <div class="ex-body">
+          <div class="given">Path has 3 links: R1 = 500 kbps, R2 = 2 Mbps, R3 = 1 Mbps. File size = 4,000,000 bytes.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Bottleneck = slowest link</div>\( Throughput = \min(500\text{k}, 2000\text{k}, 1000\text{k}) = 500\text{ kbps} \)</div></div>
+          <div class="step"><div class="stepnum">2</div><div class="stepcontent"><div class="slabel">Transfer time</div>\( \dfrac{4{,}000{,}000\times8}{500{,}000} = 64\text{ s} \)</div></div>
+          <div class="step"><div class="stepnum">3</div><div class="stepcontent"><div class="slabel">If R2 drops to 100 kbps instead</div>New bottleneck = 100 kbps → Time = 32,000,000 / 100,000 = 320 s</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>64 s originally; 320 s if R2 = 100 kbps.</b></div></div>
+        </div>
+      </div>
+
+      <div class="example">
+        <div class="ex-head"><span class="ex-title">Ex. 11 — Conceptual: Network Link vs. Physical Courier</span><span class="ex-src">Workbook · Knowledge Test 2, Q7 (classic "sneakernet" problem)</span></div>
+        <div class="ex-body">
+          <div class="given">Send 40 TB from Dhaka to Chittagong. Dedicated link = 1 Gbps. Compare vs. overnight courier.</div>
+          <div class="step"><div class="stepnum">1</div><div class="stepcontent"><div class="slabel">Convert &amp; compute link time</div>\( 40\times10^{12}\text{ bytes} \times 8 = 3.2\times10^{14}\text{ bits} \)<br>\( 3.2\times10^{14}/10^9 = 320{,}000\text{ s} \approx 88.9\text{ hours} \approx 3.7\text{ days} \)</div></div>
+          <div class="answer-box"><span class="tick">✓</span><div><b>Courier wins</b> (≈24 h vs ≈89 h). At very large data volumes and limited bandwidth, physically transporting storage media can beat network transfer — a well-known "bandwidth of a truck" result.</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ================= SELF TEST ================= -->
+    <section id="self-test">
+      <h2><span class="idx">12</span>Self-Test — Solve, Then Reveal</h2>
+      <p class="lead">Cover the answer, solve on paper, then click to check. Try substituting your own Student ID's last two digits wherever "N" appears.</p>
+
+      <details class="practice">
+        <summary><span><span class="qtag">Q1</span>Circuit switching capacity</span><span class="chev">›</span></summary>
+        <div class="sol">
+          <p><b>Problem:</b> A switch link runs at 0.5 Gbps. Each user needs 50 Mbps. What's the max number of circuit-switched users?</p>
+          <p><b>Solution:</b> Convert: 0.5 Gbps = 500 Mbps. \( N_{cs} = 500/50 = \mathbf{10\ users} \).</p>
+        </div>
+      </details>
+
+      <details class="practice">
+        <summary><span><span class="qtag">Q2</span>Specific vs any user</span><span class="chev">›</span></summary>
+        <div class="sol">
+          <p><b>Problem:</b> n = 10 users, p = 0.3. Find (a) P(a specific named user active, rest idle) and (b) P(any one user active, rest idle).</p>
+          <p><b>Solution (a):</b> \( p(1-p)^{9} = 0.3 \times 0.7^9 \approx 0.3 \times 0.0404 \approx \mathbf{0.0121} \)</p>
+          <p><b>Solution (b):</b> Multiply by n = 10 → \( 10 \times 0.0121 \approx \mathbf{0.121} \)</p>
+        </div>
+      </details>
+
+      <details class="practice">
+        <summary><span><span class="qtag">Q3</span>More-than probability (ID-style)</span><span class="chev">›</span></summary>
+        <div class="sol">
+          <p><b>Problem:</b> A packet-switched network has n = 10 users, each transmits with probability p = 0.5, independently. Find P(more than 7 users transmitting simultaneously).</p>
+          <p><b>Setup:</b> \( P(X>7) = \sum_{i=8}^{10}\binom{10}{i}(0.5)^i(0.5)^{10-i} \)</p>
+          <p><b>Terms:</b> i=8: \(\binom{10}{8}(0.5)^{10}=45/1024\approx0.0439\) · i=9: \(10/1024\approx0.00977\) · i=10: \(1/1024\approx0.00098\)</p>
+          <p><b>Solution:</b> Sum ≈ 0.0439 + 0.00977 + 0.00098 ≈ <b>0.0547 (≈5.5%)</b></p>
+        </div>
+      </details>
+
+      <details class="practice">
+        <summary><span><span class="qtag">Q4</span>End-to-end delay, 2 links</span><span class="chev">›</span></summary>
+        <div class="sol">
+          <p><b>Problem:</b> Packet = 2000 bits. Link 1: R = 2 Mbps, d = 100 km. Link 2: R = 1 Mbps, d = 200 km. Propagation speed = 2×10⁸ m/s. Router processing = 2 ms. No queuing.</p>
+          <p><b>Link 1:</b> \( d_{trans}=2000/2{,}000{,}000=1\text{ms} \), \( d_{prop}=100{,}000/2\times10^8=0.5\text{ms} \)</p>
+          <p><b>Router:</b> \( d_{proc}=2\text{ms} \)</p>
+          <p><b>Link 2:</b> \( d_{trans}=2000/1{,}000{,}000=2\text{ms} \), \( d_{prop}=200{,}000/2\times10^8=1\text{ms} \)</p>
+          <p><b>Total:</b> 1 + 0.5 + 2 + 2 + 1 = <b>6.5 ms</b></p>
+        </div>
+      </details>
+
+      <details class="practice">
+        <summary><span><span class="qtag">Q5</span>Queuing delay, general form</span><span class="chev">›</span></summary>
+        <div class="sol">
+          <p><b>Problem:</b> One packet is 3/4 done transmitting; 6 packets waiting; each packet = 1000 bytes; link = 4 Mbps. Find queuing delay.</p>
+          <p><b>Setup:</b> L = 8000 bits, x = 0.75×8000 = 6000 bits remaining-to-send = 2000 bits.</p>
+          <p><b>Current packet remainder:</b> \( 2000/4{,}000{,}000 = 0.5\text{ms} \)</p>
+          <p><b>6 waiting packets:</b> \( 6\times(8000/4{,}000{,}000) = 6\times2\text{ms}=12\text{ms} \)</p>
+          <p><b>Total:</b> 0.5 + 12 = <b>12.5 ms</b></p>
+        </div>
+      </details>
+
+      <details class="practice">
+        <summary><span><span class="qtag">Q6</span>Throughput bottleneck</span><span class="chev">›</span></summary>
+        <div class="sol">
+          <p><b>Problem:</b> Path: R1 = 10 Mbps, R2 = 2 Mbps, R3 = 5 Mbps. File = 1 MB (1,000,000 bytes). Find throughput and transfer time.</p>
+          <p><b>Bottleneck:</b> min(10, 2, 5) = <b>2 Mbps</b></p>
+          <p><b>Time:</b> \( (1{,}000{,}000\times8)/2{,}000{,}000 = \mathbf{4\text{ s}} \)</p>
+        </div>
+      </details>
+    </section>
+
+    <!-- ================= MISTAKES ================= -->
+    <section id="mistakes">
+      <h2><span class="idx">13</span>Common Mistakes That Cost Marks</h2>
+      <div class="callout warn"><div class="cico">1️⃣</div><div><b>Unit mismatches</b>Mixing Mbps with bytes, or forgetting Gbps → Mbps → bps conversion. Always write the conversion as its own line.</div></div>
+      <div class="callout warn"><div class="cico">2️⃣</div><div><b>Bits vs Bytes</b>Packet/file sizes are usually given in bytes but formulas need <b>bits</b>. Always multiply by 8 first and label it clearly.</div></div>
+      <div class="callout warn"><div class="cico">3️⃣</div><div><b>Off-by-one summation bounds</b>"More than k" begins at <code>i = k+1</code>; "at least k" begins at <code>i = k</code>. Confusing these changes your entire answer.</div></div>
+      <div class="callout warn"><div class="cico">4️⃣</div><div><b>Forgetting the combinatorial factor</b>"Any user" needs \( \binom{n}{k} \); "one specific/given user" does not.</div></div>
+      <div class="callout warn"><div class="cico">5️⃣</div><div><b>Dropping circuit setup time / processing delay</b>These are separate additive terms given explicitly in the question — don't fold them into the transmission delay.</div></div>
+      <div class="callout warn"><div class="cico">6️⃣</div><div><b>Using distance in km directly</b>Convert km → m before dividing by a propagation speed given in m/s.</div></div>
+      <div class="callout warn"><div class="cico">7️⃣</div><div><b>Ignoring "extra" numbers in a question</b>Some questions (e.g. pure propagation delay) deliberately give packet size or transmission rate that you don't need for that specific sub-question. Only use what the formula requires.</div></div>
+    </section>
+
+    <!-- ================= CHEATSHEET ================= -->
+    <section id="cheatsheet">
+      <h2><span class="idx">14</span>Formula Cheat-Sheet (Last-Minute Review)</h2>
+
+      <div class="chip-row">
+        <span class="chip"><b>1 Gbps</b> = 1000 Mbps = 10⁶ Kbps = 10⁹ bps</span>
+        <span class="chip"><b>1 Byte</b> = 8 bits</span>
+        <span class="chip"><b>1 KB</b> = 1000 Bytes = 8000 bits</span>
+        <span class="chip"><b>1 ms</b> = 10⁻³ s</span>
+        <span class="chip"><b>1 μs</b> = 10⁻⁶ s</span>
+      </div>
+
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <h4>Circuit Switching</h4>
+          <div class="fmath" style="font-size:14px;">\[ N_{cs}=\dfrac{R_{link}}{R_{user}} \]</div>
+          <div class="fmath" style="font-size:14px;">\[ T_{total}=T_{setup}+\dfrac{\text{File bits}}{R_{link}/\text{slots}} \]</div>
+        </div>
+        <div class="cheat-card">
+          <h4>Packet Switching Probability</h4>
+          <div class="fmath" style="font-size:14px;">\[ P(X=k)=\binom{n}{k}p^k(1-p)^{n-k} \]</div>
+          <div class="fmath" style="font-size:14px;">specific user: \(p(1-p)^{n-1}\)<br>any user: \(np(1-p)^{n-1}\)</div>
+        </div>
+        <div class="cheat-card">
+          <h4>Delay Components</h4>
+          <div class="fmath" style="font-size:14px;">\[ d_{trans}=\dfrac{L}{R} \quad d_{prop}=\dfrac{d}{s} \]</div>
+          <div class="fmath" style="font-size:14px;">\[ d_{nodal}=d_{proc}+d_{queue}+d_{trans}+d_{prop} \]</div>
+        </div>
+        <div class="cheat-card">
+          <h4>Queuing &amp; Throughput</h4>
+          <div class="fmath" style="font-size:14px;">\[ d_{queue}=\dfrac{L-x}{R}+n\cdot\dfrac{L}{R} \]</div>
+          <div class="fmath" style="font-size:14px;">\[ Throughput=\min(R_1,\dots,R_n) \]</div>
+        </div>
+      </div>
+
+      <div class="callout tip" style="margin-top:20px;">
+        <div class="cico">🎯</div>
+        <div><b>90-second exam checklist</b>Read units → convert everything to bits/bps/seconds → identify which formula the wording points to (exactly / more than / at least) → write the setup line before computing → double-check the summation's starting index → box your final answer with correct units.</div>
+      </div>
+    </section>
+
+    <footer>
+      Built for Tan · CSE 3711 Computer Networks · UIU — Class 03 &amp; 04 CT Prep<br>
+      Caravan Analogy intentionally omitted per syllabus scope.
+    </footer>
+  </main>
+</div>
+
+<script>
+  // scroll progress bar
+  const progress = document.getElementById('progress');
+  function updateProgress(){
+    const h = document.documentElement;
+    const scrolled = (h.scrollTop) / (h.scrollHeight - h.clientHeight) * 100;
+    progress.style.width = scrolled + '%';
+  }
+  document.addEventListener('scroll', updateProgress);
+  updateProgress();
+
+  // active TOC link tracking
+  const sections = document.querySelectorAll('section, header.hero');
+  const links = document.querySelectorAll('#tocNav a');
+  const map = {};
+  links.forEach(l => map[l.getAttribute('href').slice(1)] = l);
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const id = entry.target.id;
+      if(!map[id]) return;
+      if(entry.isIntersecting){
+        links.forEach(l => l.classList.remove('active'));
+        map[id].classList.add('active');
+      }
+    });
+  }, { rootMargin: '-15% 0px -70% 0px', threshold: 0 });
+
+  document.querySelectorAll('section[id], header[id]').forEach(s => observer.observe(s));
+
+  // close mobile sidebar on link click
+  links.forEach(l => l.addEventListener('click', () => {
+    document.getElementById('sidebar').classList.remove('open');
+  }));
+</script>
+
+</body>
+</html>
