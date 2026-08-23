@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSE 3711 — Encapsulation &amp; HTTP Math | Full-Marks Guide</title>
+<style>
+:root{
+  --bg:#0b0e17;
+  --bg2:#11162445;
+  --panel:#141a29;
+  --panel2:#1a2136;
+  --border:#262f47;
+  --text:#dbe1f5;
+  --muted:#8b93b0;
+  --indigo:#7c8cff;
+  --purple:#a78bfa;
+  --violet:#c084fc;
+  --pink:#f472b6;
+  --green:#34d399;
+  --amber:#fbbf24;
+  --red:#f87171;
+  --cyan:#22d3ee;
+  --grad: linear-gradient(135deg,var(--indigo),var(--purple) 55%,var(--violet));
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(1100px 600px at 85% -10%, #2a1f5a33, transparent 60%),
+    radial-gradient(900px 500px at -10% 10%, #17224a3d, transparent 55%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Segoe UI',ui-sans-serif,system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+  line-height:1.65;
+}
+#progress{position:fixed;top:0;left:0;height:3px;background:var(--grad);width:0%;z-index:999;transition:width .1s;}
+
+/* Layout */
+.wrap{display:flex;min-height:100vh;}
+aside#toc{
+  width:280px;flex-shrink:0;position:sticky;top:0;align-self:flex-start;
+  height:100vh;overflow-y:auto;padding:26px 18px 40px 22px;
+  border-right:1px solid var(--border);
+  background:linear-gradient(180deg,#0d1120,#0a0d17 60%);
+}
+aside#toc::-webkit-scrollbar{width:6px;}
+aside#toc::-webkit-scrollbar-thumb{background:#2a3352;border-radius:6px;}
+.toc-brand{font-size:12px;letter-spacing:2px;color:var(--muted);text-transform:uppercase;margin-bottom:4px;}
+.toc-title{font-size:19px;font-weight:800;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:22px;line-height:1.3;}
+#toc nav a{
+  display:block;padding:7px 10px;margin:2px 0;border-radius:8px;
+  color:var(--muted);text-decoration:none;font-size:13.5px;
+  border-left:2px solid transparent;transition:.15s;
+}
+#toc nav a:hover{color:var(--text);background:#ffffff08;}
+#toc nav a.active{color:#fff;background:#7c8cff17;border-left:2px solid var(--indigo);font-weight:600;}
+#toc nav a.sub{padding-left:24px;font-size:12.5px;}
+#toc nav .grp{margin-top:16px;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#57608a;font-weight:700;padding:0 10px;}
+
+main{flex:1;min-width:0;padding:44px 48px 100px;max-width:980px;}
+@media (max-width:900px){
+  aside#toc{display:none;}
+  main{padding:28px 20px 80px;}
+}
+
+/* Header */
+.hero{
+  background:linear-gradient(135deg,#161c30,#1b2140 60%,#241a3d);
+  border:1px solid var(--border);border-radius:18px;
+  padding:34px 32px;margin-bottom:38px;position:relative;overflow:hidden;
+}
+.hero::after{content:"";position:absolute;inset:0;background:radial-gradient(400px 200px at 90% 0%,#7c8cff22,transparent 70%);}
+.hero h1{margin:0 0 8px;font-size:30px;font-weight:800;letter-spacing:-0.3px;background:var(--grad);-webkit-background-clip:text;background-clip:text;color:transparent;}
+.hero p{margin:0;color:var(--muted);font-size:15px;max-width:640px;}
+.hero .tags{margin-top:16px;display:flex;gap:8px;flex-wrap:wrap;}
+.tag{font-size:11.5px;padding:5px 11px;border-radius:999px;background:#ffffff0d;border:1px solid var(--border);color:var(--muted);}
+
+h2.section-title{
+  font-size:24px;margin:56px 0 18px;padding-bottom:12px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:12px;scroll-margin-top:20px;
+}
+h2.section-title .num{
+  width:34px;height:34px;border-radius:10px;background:var(--grad);
+  display:flex;align-items:center;justify-content:center;font-weight:800;color:#0b0e17;font-size:15px;flex-shrink:0;
+}
+h3{font-size:18.5px;margin:32px 0 12px;color:#eef0ff;scroll-margin-top:20px;}
+h3 .chip{font-size:11px;background:#22294a;color:var(--indigo);padding:3px 9px;border-radius:6px;margin-right:8px;vertical-align:middle;font-weight:700;}
+h4{font-size:15.5px;margin:20px 0 8px;color:#c9cfec;}
+p{color:#c3c9e4;}
+a{color:var(--indigo);}
+strong{color:#f1f3ff;}
+code{background:#1c2338;padding:2px 6px;border-radius:5px;font-size:0.9em;color:var(--cyan);border:1px solid var(--border);}
+
+ul,ol{color:#c3c9e4;padding-left:22px;}
+li{margin:6px 0;}
+
+/* Cards */
+.card{
+  background:var(--panel);border:1px solid var(--border);border-radius:14px;
+  padding:22px 24px;margin:18px 0;
+}
+.formula-box{
+  background:linear-gradient(135deg,#171d33,#1a2140);
+  border:1px solid #333c66;border-left:3px solid var(--indigo);
+  border-radius:12px;padding:18px 22px;margin:16px 0;
+}
+.formula-box .label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--indigo);font-weight:700;margin-bottom:8px;}
+.formula{font-size:17px;color:#f1f3ff;font-weight:600;letter-spacing:.2px;}
+.formula .var{color:var(--violet);}
+
+.pitfall{
+  background:linear-gradient(135deg,#2a1418,#241318);
+  border:1px solid #4a2530;border-left:3px solid var(--red);
+  border-radius:12px;padding:16px 20px;margin:16px 0;
+}
+.pitfall .label{color:var(--red);font-weight:800;font-size:12.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+
+.tip{
+  background:linear-gradient(135deg,#122622,#0f2320);
+  border:1px solid #1f4a3d;border-left:3px solid var(--green);
+  border-radius:12px;padding:16px 20px;margin:16px 0;
+}
+.tip .label{color:var(--green);font-weight:800;font-size:12.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+
+.assume{
+  background:linear-gradient(135deg,#241a10,#1e1710);
+  border:1px solid #4a3820;border-left:3px solid var(--amber);
+  border-radius:12px;padding:16px 20px;margin:16px 0;
+}
+.assume .label{color:var(--amber);font-weight:800;font-size:12.5px;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;}
+
+/* Solved problem block */
+.problem{
+  border:1px solid var(--border);border-radius:16px;margin:22px 0;overflow:hidden;
+  background:var(--panel2);
+}
+.problem .phead{
+  padding:14px 20px;background:#1c2440;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--border);flex-wrap:wrap;gap:8px;
+}
+.problem .phead .ptitle{font-weight:700;color:#eef0ff;font-size:14.5px;}
+.problem .phead .psrc{font-size:11.5px;color:var(--muted);background:#0000002e;padding:4px 10px;border-radius:999px;border:1px solid var(--border);}
+.problem .pbody{padding:20px;}
+.problem .given{background:#0f1424;border-radius:10px;padding:14px 18px;margin-bottom:14px;font-size:14px;color:#aeb6d6;}
+.problem .given b{color:#d9defa;}
+.step{margin:12px 0;padding-left:16px;border-left:2px solid #2a3358;}
+.step .stepnum{color:var(--purple);font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:1px;}
+.answer{
+  margin-top:16px;padding:14px 18px;border-radius:10px;
+  background:linear-gradient(135deg,#132118,#0f1d16);border:1px solid #1f4a35;
+  color:#8ff5c4;font-weight:700;font-size:15px;
+}
+.answer .small{display:block;color:#7fdba9;font-weight:500;font-size:12.5px;margin-top:6px;}
+
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13.8px;}
+th,td{padding:10px 14px;border:1px solid var(--border);text-align:left;}
+th{background:#1a2140;color:#c9cfec;font-weight:700;}
+td{color:#c3c9e4;}
+tr:nth-child(even) td{background:#ffffff03;}
+.center{text-align:center;}
+
+.checklist{list-style:none;padding-left:0;}
+.checklist li{
+  padding:10px 14px;margin:6px 0;background:#131a2c;border-radius:9px;border:1px solid var(--border);
+  display:flex;gap:10px;align-items:flex-start;
+}
+.checklist li::before{content:"✓";color:var(--green);font-weight:900;flex-shrink:0;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+@media (max-width:700px){.grid2{grid-template-columns:1fr;}}
+
+.divider{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);margin:40px 0;}
+
+footer{margin-top:60px;padding-top:24px;border-top:1px solid var(--border);color:var(--muted);font-size:13px;}
+
+.doll{font-size:22px;}
+.mono{font-family:'Cascadia Code',Consolas,monospace;background:#0d1120;border-radius:8px;padding:14px 16px;color:#c8d0f0;font-size:13px;overflow-x:auto;border:1px solid var(--border);}
+</style>
+<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+</head>
+<body>
+<div id="progress"></div>
+<div class="wrap">
+
+<aside id="toc">
+  <div class="toc-brand">CSE 3711 · Computer Networks</div>
+  <div class="toc-title">Encapsulation &amp; HTTP Math — Full Marks Guide</div>
+  <nav id="navlinks">
+    <a href="#strategy" class="active">🎯 Exam Strategy</a>
+
+    <div class="grp">Part 1 — Encapsulation</div>
+    <a href="#enc-concepts">1.1 Core Concepts</a>
+    <a href="#enc-formulas">1.2 Formula Toolkit</a>
+    <a href="#enc-p1" class="sub">Ex. Overhead % (L=500B)</a>
+    <a href="#enc-p2" class="sub">Ex. Packet Headers (X,Y,Z)</a>
+    <a href="#enc-p3" class="sub">Ex. Optimal PDU size</a>
+    <a href="#enc-p4" class="sub">Mid Spring'26 — Q1c</a>
+    <a href="#enc-p5" class="sub">Mid Fall'25 — Q1d</a>
+    <a href="#enc-p6" class="sub">Mid Summer'25 — Q1a</a>
+    <a href="#enc-pitfalls">1.4 Pitfalls</a>
+    <a href="#enc-checklist">1.5 Full-Marks Checklist</a>
+
+    <div class="grp">Part 2 — HTTP Math</div>
+    <a href="#http-concepts">2.1 Core Concepts</a>
+    <a href="#http-formulas">2.2 Formula Toolkit</a>
+    <a href="#http-p1" class="sub">Workbook — 30 images</a>
+    <a href="#http-p2" class="sub">KT#2 Q5 — 5 images (a–e)</a>
+    <a href="#http-p3" class="sub">Mid Spring'26 — Q2b</a>
+    <a href="#http-p4" class="sub">Mid Fall'25 — Q2b</a>
+    <a href="#http-p5" class="sub">Mid Summer'25 — Q3a</a>
+    <a href="#http-pitfalls">2.4 Pitfalls</a>
+    <a href="#http-checklist">2.5 Full-Marks Checklist</a>
+
+    <div class="grp">Wrap-up</div>
+    <a href="#cheatsheet">📋 Cheat Sheet</a>
+    <a href="#gaps">❓ What's Not Covered</a>
+  </nav>
+</aside>
+
+<main>
+
+<div class="hero">
+  <h1>Encapsulation &amp; HTTP Math</h1>
+  <p>Complete exam guide for CSE 3711 (Computer Networks) — built directly from your Chapter 1 &amp; Chapter 2 slides/workbooks and your three most recent midterm question papers (Spring'26, Fall'25, Summer'25). Every formula is sourced from your own materials; every problem is solved step-by-step with verified numbers.</p>
+  <div class="tags">
+    <span class="tag">Encapsulation &amp; Layering</span>
+    <span class="tag">TCP Segments &amp; Overhead %</span>
+    <span class="tag">HTTP Non-Persistent vs Persistent</span>
+    <span class="tag">RTT / FTT Math</span>
+    <span class="tag">3 Midterms Solved</span>
+  </div>
+</div>
+
+<h2 class="section-title" id="strategy"><span class="num">★</span>Exam Strategy — How These Questions Get Marked</h2>
+<p>Across all 3 of your midterms (Spring'26, Fall'25, Summer'25), Q1 always contains an <b>encapsulation/overhead</b> sub-question and Q2 always contains an <b>HTTP timing</b> sub-question. Markers give partial credit heavily — so <b>always show every intermediate number</b>, never just the final answer.</p>
+<ul class="checklist">
+  <li>State your <b>MSS / max payload</b> calculation explicitly before counting segments — this is worth marks on its own.</li>
+  <li>Always show <b>units</b> (bits vs bytes, Mbps vs MBps) — this is the #1 place marks are lost.</li>
+  <li>For HTTP timing, always write the <b>general formula first</b> (e.g. "Non-persistent = n×(2RTT+FTT)"), then substitute numbers.</li>
+  <li>When a question changes one parameter (e.g. "now reduce frame size to 1200B") — <b>don't recompute from scratch on paper</b>; reuse your MSS formula and just show the delta.</li>
+  <li>Draw the tiny timeline/ladder diagram (client ↕ server, RTT arrows) whenever "illustrate" or "draw" is asked — this is free marks even if your number is slightly off.</li>
+</ul>
+
+<div class="divider"></div>
+
+<!-- ================= PART 1 : ENCAPSULATION ================= -->
+<h2 class="section-title" id="enc-concepts"><span class="num">1</span>Encapsulation — Core Concepts</h2>
+
+<h3 id="enc-concepts-a">Why Layering? <span class="chip">Slide 1-46 to 1-50</span></h3>
+<p>Networks are complex (hosts, routers, links, applications, protocols, hardware). Layering gives an <b>explicit structure</b> so each layer implements a service using only the layer below it. Benefits: <b>modularity</b>, easier <b>troubleshooting</b>, and <b>functionality reuse</b> — a change inside one layer (e.g. gate procedure at an airport) is transparent to the rest of the system.</p>
+
+<h3 id="enc-concepts-b">The Encapsulation Process <span class="chip">Slide 1-51 to 1-56</span></h3>
+<p>Each layer takes the unit handed down from the layer above and wraps it with its own header (and sometimes trailer) to build its own protocol data unit (PDU):</p>
+<div class="mono">
+Application  →  M                              (message)
+Transport    →  Ht | M                         (segment)
+Network      →  Hn | Ht | M                    (datagram/packet)
+Data Link    →  Hl | Hn | Ht | M | (Dt)         (frame)
+Physical     →  raw bit stream
+</div>
+<p>Your slides call this the <b>Matryoshka / stacking-doll analogy</b> <span class="doll">🪆</span> — each doll (layer) sits inside a bigger one, and nothing is thrown away as you go down the stack. <b>De-encapsulation</b> at the receiver is the exact reverse: each layer strips its own header/trailer and hands the payload up.</p>
+
+<h3 id="enc-concepts-c">OSI 7-Layer Model — Encapsulation Table <span class="chip">Workbook Sec 1.5</span></h3>
+<table>
+<tr><th>#</th><th>Layer</th><th>Function</th><th>PDU name</th><th>Encapsulation (cumulative)</th></tr>
+<tr><td>7</td><td>Application</td><td>Network services (email, file transfer)</td><td>Data</td><td>AH + data</td></tr>
+<tr><td>6</td><td>Presentation</td><td>Formatting, encryption, compression</td><td>Data</td><td>PH + AH + data</td></tr>
+<tr><td>5</td><td>Session</td><td>Setup/manage end-to-end conversation</td><td>Data</td><td>SH + PH + AH + data</td></tr>
+<tr><td>4</td><td>Transport</td><td>End-to-end delivery of messages</td><td><b>Segment</b></td><td>TH + SH + PH + AH + data</td></tr>
+<tr><td>3</td><td>Network</td><td>End-to-end transmission of packets</td><td><b>Packet/Datagram</b></td><td>NH + TH + SH + PH + AH + data</td></tr>
+<tr><td>2</td><td>Data Link</td><td>Transmission on one given link</td><td><b>Frame</b></td><td>DH + NH + TH + SH + PH + AH + data + <b>DT</b></td></tr>
+<tr><td>1</td><td>Physical</td><td>Transmission of bits</td><td>Signal</td><td>bit stream (e.g. 01100101…)</td></tr>
+</table>
+<p>In the <b>TCP/IP model</b> (what your midterms actually give you numbers for), Presentation+Session collapse into Application, and Physical merges into "Network Access": so you only ever add <b>3 headers</b> — Transport (TCP/UDP), Network (IP), Data Link — plus 1 trailer (Data Link only).</p>
+
+<h3 id="enc-concepts-d">Which Device Processes Which Layer? <span class="chip">Frequently tested — Summer'25 Q1a, Workbook KT3</span></h3>
+<table>
+<tr><th>Device</th><th>Layers it processes</th><th>Why</th></tr>
+<tr><td><b>Host</b> (end system)</td><td>All 5 layers (App → Physical)</td><td>Both source &amp; destination of the actual communication — needs to build/read every header.</td></tr>
+<tr><td><b>Router</b></td><td>Physical, Data Link, <b>Network</b></td><td>Must read the IP header to decide the outbound link ("routes packets"). De-encapsulates up to Layer 3 only, then re-encapsulates with a <i>new</i> Layer-2 header for the next hop.</td></tr>
+<tr><td><b>Switch / Bridge</b></td><td>Physical, <b>Data Link</b> only</td><td>Forwards based on MAC address; never looks inside the IP packet. It does <b>not</b> rewrite source/destination MAC — it's transparent.</td></tr>
+</table>
+<div class="tip"><div class="label">💡 Direct answer for "which protocols run at intermediate nodes?"</div>
+Given {IP, UDP, Ethernet, SMTP, TCP, HTTP} → only <b>IP</b> and <b>Ethernet</b> run at intermediate nodes (routers process IP+Ethernet; switches process Ethernet only). <b>TCP, UDP, SMTP, HTTP</b> are end-to-end protocols — they exist <i>only</i> at the two communicating hosts, never at a router or switch in between.</div>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="enc-formulas"><span class="num">1.2</span>Formula Toolkit</h2>
+
+<div class="formula-box">
+<div class="label">Max payload per frame (MSS)</div>
+<div class="formula">If frame size given <span class="var">excludes</span> DL header/trailer → that number = Max IP packet size<br>
+MSS (max TCP data) = Max IP packet size − <span class="var">IP header</span> − <span class="var">TCP header</span></div>
+</div>
+<div class="formula-box">
+<div class="label">Max payload per frame — alternate wording</div>
+<div class="formula">If frame size given <span class="var">includes</span> DL header/trailer →<br>
+MSS = Frame size − <span class="var">DL header</span> − <span class="var">DL trailer</span> − <span class="var">IP header</span> − <span class="var">TCP header</span></div>
+</div>
+<div class="formula-box">
+<div class="label">Number of TCP segments needed</div>
+<div class="formula">segments = ⌈ <span class="var">total application data</span> ÷ <span class="var">MSS</span> ⌉ &nbsp;(always round <b>up</b>)<br>
+last segment's data = total data − (segments−1) × MSS</div>
+</div>
+<div class="formula-box">
+<div class="label">Overhead % (per full-size segment)</div>
+<div class="formula">overhead bytes = DL header + DL trailer + IP header + TCP header<br>
+overhead % = overhead bytes ÷ (overhead bytes + MSS) × 100</div>
+</div>
+<div class="formula-box">
+<div class="label">Latency for a segmented message over H hops (store-and-forward, pipelined)</div>
+<div class="formula">T = (H + k − 1) × P<br>
+<span class="var">H</span> = number of links (hops) &nbsp;·&nbsp; <span class="var">k</span> = number of PDUs &nbsp;·&nbsp; <span class="var">P</span> = size of one PDU (data + header)</div>
+</div>
+
+<div class="assume"><div class="label">⚠ Units assumption used throughout this guide</div>
+Unless a question explicitly says "1024", this guide uses the decimal networking convention consistently used in your slides/midterms: 1 KB = 1000 bytes, 1 Mbps = 10⁶ bps, 1 Gbps = 10⁹ bps. This matches the clean numbers your midterms are designed to produce (e.g. MSS = 1460B is the real-world Ethernet standard). Always double check with your instructor which convention is graded.</div>
+
+<div class="divider"></div>
+
+<h3>Solved Problems</h3>
+
+<div class="problem" id="enc-p1">
+<div class="phead"><span class="ptitle">Overhead % for an L-byte message</span><span class="psrc">Workbook Ch.1 · Exercise 13</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> L = 500 bytes message. TCP header = 20B. IP header = 20B. Data Link header+trailer = 18B combined. Find % of physical-layer bits that is actual message data.</div>
+<div class="step"><span class="stepnum">Step 1 — Total frame size</span><br>Total = 500 + 20 + 20 + 18 = <b>558 bytes</b></div>
+<div class="step"><span class="stepnum">Step 2 — Message %</span><br>500 ÷ 558 × 100 = <b>89.61%</b></div>
+<div class="step"><span class="stepnum">Step 3 — Overhead % (its complement)</span><br>58 ÷ 558 × 100 = <b>10.39%</b></div>
+<div class="answer">Message data = 89.61% &nbsp;|&nbsp; Overhead = 10.39%<span class="small">This is the exact pattern used in every "% overhead" midterm question — memorize this 3-step flow.</span></div>
+</div>
+</div>
+
+<div class="problem" id="enc-p2">
+<div class="phead"><span class="ptitle">Understanding Packet Headers (H1 → Bridge → Router → H2)</span><span class="psrc">Workbook Ch.1 · Exercise 12</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> H1 (port 8888) sends a TCP message to H2 (port 9999). Path: H1 —(X)— Bridge B —(Y)— Router R —(Z)— H2. Layers numbered 1=Physical…5=Application. List every point (X, Y, Z) and layer where each address appears.</div>
+<div class="step"><span class="stepnum">Key rule</span><br>
+<b>IP addresses &amp; port numbers never change</b> across the path (no NAT here) — they belong to Network (L3) and Transport (L4) headers, which only intermediate <i>routers</i> (not bridges) even look at, and neither device modifies them.<br>
+<b>MAC addresses change every time the frame crosses a router</b> (new L2 header per link) but stay the same across a bridge/switch (bridges are transparent — they forward the frame unmodified).</div>
+<table>
+<tr><th>Address</th><th>Where it's written</th><th>Reasoning</th></tr>
+<tr><td><code>H2.ip</code></td><td>{(X,L3), (Y,L3), (Z,L3)}</td><td>Destination IP — set once by H1, unchanged end-to-end</td></tr>
+<tr><td><code>R.ip</code></td><td><b>{ } — nowhere</b></td><td>Router's own interface IP is never the source/destination of this H1→H2 traffic</td></tr>
+<tr><td><code>B.mac</code></td><td><b>{ } — nowhere</b></td><td>A transparent bridge does not insert its own MAC into forwarded frames</td></tr>
+<tr><td><code>R.mac</code></td><td>{(X,L2)<i>dest</i>, (Y,L2)<i>dest</i>, (Z,L2)<i>source</i>}</td><td>Frame's L2 destination on the H1-side link is the router (X,Y); after the router re-encapsulates, R.mac becomes the L2 <i>source</i> on the far side (Z)</td></tr>
+<tr><td><code>H2.mac</code></td><td>{(Z,L2)}</td><td>Only becomes the frame's L2 destination once it's on the Router–H2 link</td></tr>
+<tr><td>Port 8888</td><td>{(X,L4), (Y,L4), (Z,L4)}</td><td>Transport-layer source port, unchanged end-to-end</td></tr>
+<tr><td>Port 9999</td><td>{(X,L4), (Y,L4), (Z,L4)}</td><td>Transport-layer destination port, unchanged end-to-end</td></tr>
+</table>
+<div class="answer">Big picture: <b>L3/L4 fields (IP, ports) are set once and never touched</b> by intermediate nodes. <b>L2 fields (MAC) are rewritten only by routers</b>, never by bridges/switches.</div>
+</div>
+</div>
+
+<div class="problem" id="enc-p3">
+<div class="phead"><span class="ptitle">Optimal PDU (packet) size for lowest latency</span><span class="psrc">Workbook Ch.1 · Exercise 14</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> 150,000-byte message. Each PDU header = 200 bytes. Path has 2 packet-switching nodes → <b>3 links (H=3)</b>. Compare PDU data sizes: (i) 10,000B (ii) 2,500B (iii) 750B. Which gives lowest latency (in "bytes" of time, i.e. R normalized to 1 byte/unit)?</div>
+<div class="step"><span class="stepnum">Formula</span><br>T = (H + k − 1) × P, where k = number of PDUs = 150,000 ÷ data-per-PDU, and P = data-per-PDU + 200 (header)</div>
+<table>
+<tr><th>Scenario</th><th>k (PDUs)</th><th>P (bytes)</th><th>T = (3+k−1)×P</th></tr>
+<tr><td>(i) 10,000 B/PDU</td><td>15</td><td>10,200</td><td>17 × 10,200 = <b>173,400</b></td></tr>
+<tr><td>(ii) 2,500 B/PDU</td><td>60</td><td>2,700</td><td>62 × 2,700 = <b>167,400 ✅ lowest</b></td></tr>
+<tr><td>(iii) 750 B/PDU</td><td>200</td><td>950</td><td>202 × 950 = <b>191,900</b></td></tr>
+</table>
+<div class="answer">Scenario (ii), 2,500 B/PDU, gives the shortest latency (167,400 byte-time-units).
+<span class="small">Why not the smallest PDU (iii)? Because although smaller PDUs pipeline faster per hop, you now need 200 PDUs → 200×200B = 40,000B of pure header overhead, which dominates. Why not the biggest PDU (i)? Because each store-and-forward hop now has to fully receive/re-transmit a much bigger chunk before forwarding, adding per-hop delay. The optimum is a trade-off in the middle.</span></div>
+</div>
+</div>
+
+<div class="problem" id="enc-p4">
+<div class="phead"><span class="ptitle">TCP segments + overhead % for 2 MB of data</span><span class="psrc">Midterm Spring 2026 · Q1(c)</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> App layer = 2 Mbytes. TCP header 20B. IP header 20B. Data Link 14B header + 4B trailer. Frame size = <b>1500 bytes excluding header/trailer</b> (i.e. this IS the max IP packet size / MTU).</div>
+<div class="step"><span class="stepnum">Step 1 — Find MSS</span><br>Max IP packet = 1500B (given, MTU) → MSS = 1500 − 20(IP) − 20(TCP) = <b>1460 bytes</b> <i>(this is the real-world Ethernet MSS — a good sign your setup is right)</i></div>
+<div class="step"><span class="stepnum">Step 2 — Segments needed</span><br>2,000,000 ÷ 1460 = 1369.86 → ⌈⌉ = <b>1370 segments</b><br>(1369 full segments of 1460B + 1 last segment of 2,000,000 − 1369×1460 = <b>1260B</b>)</div>
+<div class="step"><span class="stepnum">Step 3 — Overhead % (use a full-size segment)</span><br>Full frame = 14 + 20 + 20 + 1460 + 4 = <b>1518 bytes</b> (again — the real Ethernet max frame size)<br>Overhead = 14+20+20+4 = 58B → 58 ÷ 1518 × 100 = <b>3.82%</b></div>
+<div class="answer">1370 TCP segments required &nbsp;|&nbsp; Overhead ≈ 3.82% per full segment
+<span class="small">Bonus: if asked about the LAST (partial, 1260B) segment specifically, its overhead is higher: 58÷1318 = 4.40% — smaller payload ⇒ higher overhead ratio. Mention this if the question says "per segment" ambiguously.</span></div>
+</div>
+</div>
+
+<div class="problem" id="enc-p5">
+<div class="phead"><span class="ptitle">4000-byte message, OSI model wording + frame-size change</span><span class="psrc">Midterm Fall 2025 · Q1(d)</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> 4000-byte application message. TCP 20B header, IP 20B header, DL 14B header + 4B trailer. Frame size = <b>1518 bytes, including</b> header &amp; trailer.</div>
+<div class="step"><span class="stepnum">Part I — Encapsulation description (conceptual, always answer in words + a small diagram)</span><br>
+Application creates 4000B of data → Transport (TCP) adds 20B header → segment → Network (IP) adds 20B header → datagram/packet → Data Link adds 14B header + 4B trailer → frame → Physical layer transmits as raw bits. <i>(Note the question says "OSI reference model" but only gives you Transport/Network/Data-Link headers — don't invent Presentation/Session headers that were never given numbers.)</i></div>
+<div class="step"><span class="stepnum">Part II — TCP segments needed</span><br>
+MSS = 1518 − 14(DLH) − 4(DLT) − 20(IP) − 20(TCP) = <b>1460 bytes</b><br>
+Segments = ⌈4000 ÷ 1460⌉ = <b>3 segments</b><br>
+Data portions: <b>1460B, 1460B, 1080B</b> (1460+1460+1080 = 4000 ✓)</div>
+<div class="step"><span class="stepnum">Part III — Change when frame size reduced to 1200 bytes</span><br>
+New MSS = 1200 − 14 − 4 − 20 − 20 = <b>1142 bytes</b><br>
+New segments = ⌈4000 ÷ 1142⌉ = <b>4 segments</b> (data: 1142, 1142, 1142, 574)<br>
+Overhead per segment is still 58B (14+20+20+4) regardless of size.<br>
+Old total overhead = 3 × 58 = <b>174B</b>. New total overhead = 4 × 58 = <b>232B</b>.</div>
+<div class="answer">Total overhead increases by <b>58 bytes</b> (174B → 232B, a 33.3% jump)
+<span class="small">Because the smaller frame forced one extra segment, and every extra segment costs one more full set of headers (58B). This is the same "smaller pieces ⇒ more overhead" idea as Exercise 14 above.</span></div>
+</div>
+</div>
+
+<div class="problem" id="enc-p6">
+<div class="phead"><span class="ptitle">Encapsulation/de-encapsulation with router (T) + switch (S)</span><span class="psrc">Midterm Summer 2025 · Q1(a)</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> Alice ↔ router (T) ↔ switch (S) ↔ Bob. Each device implements a different set of TCP/IP layers.</div>
+<div class="step"><span class="stepnum">Part I — Diagram</span><br>Draw the same encapsulation "staircase" from the Core Concepts table above: at Alice, build up Message→Segment→Datagram→Frame; at T (router) strip down to the Datagram, then rebuild the Frame for the next link; at S (switch) the Frame passes through untouched at Layer 2; at Bob, strip everything back up to the Message.</div>
+<div class="step"><span class="stepnum">Part II — Protocols at intermediate nodes</span><br>Given {IP, UDP, Ethernet, SMTP, TCP, HTTP}: only <b>IP</b> (at router T) and <b>Ethernet</b> (at both T and switch S) run at the intermediate nodes — because routers process up to Network layer and switches only process Data Link layer. TCP, UDP, SMTP, HTTP never appear at T or S since those are end-to-end (transport/application) protocols.</div>
+<div class="step"><span class="stepnum">Part III — Pieces of information to identify the receiving process (email example)</span><br>
+<b>2 pieces:</b> the destination <b>IP address</b> (which host) + the destination <b>port number</b> (which process/socket on that host). Together (IP, port) = a socket.<br>
+<i>Example: Alice's mail client sends to mail server IP 128.119.245.12, port 25 (SMTP) → uniquely identifies the receiving mail process.</i></div>
+<div class="answer">2 pieces of information needed: <b>IP address + Port number</b> (the socket tuple)</div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="enc-pitfalls"><span class="num">1.4</span>Common Pitfalls — Encapsulation</h2>
+<div class="pitfall"><div class="label">⚠ Pitfall 1 — "Frame size" wording changes the formula</div>
+Always re-read whether the frame size given <b>excludes</b> header/trailer (→ it equals the max IP packet size directly) or <b>includes</b> them (→ subtract DL header+trailer first). Spring'26 Q1c uses "excluding"; Fall'25 Q1d uses "including" — mixing these up is the #1 way to lose the segment-count marks.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 2 — Forgetting to round UP</div>
+Segments = ⌈data ÷ MSS⌉ — never round down or truncate. A remainder of even 1 byte still needs a full extra segment.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 3 — Trailer is still overhead</div>
+Students often forget the 4-byte Data-Link <b>trailer</b> when computing "overhead". Overhead = ALL non-data bytes = every header + every trailer, not just headers, unless the question is extremely explicit that it wants headers only.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 4 — MB/KB unit convention</div>
+"2 Mbytes" could mean 2×10⁶ or 2×2²⁰ bytes. This guide uses the decimal convention (matches the clean 1460/1518-byte real-world MSS numbers). State your assumption on the exam script if it isn't specified.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 5 — Bridge/Switch does NOT rewrite MAC addresses</div>
+A very common mistake is assuming every intermediate device changes MAC addresses like a router does. Only <b>routers</b> rewrite Layer-2 addresses (because they generate a brand-new frame for the next link). Switches/bridges are transparent — the frame's MAC addresses pass through unchanged.</div>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="enc-checklist"><span class="num">1.5</span>Full-Marks Answer Checklist — Encapsulation Questions</h2>
+<ul class="checklist">
+  <li>Explicitly compute and label <b>MSS</b> (max TCP data per segment) before anything else.</li>
+  <li>Show the <b>segment count formula</b> with the ceiling symbol, then the arithmetic.</li>
+  <li>List the <b>data portion of every segment</b> (not just the count) if the question asks for "size of the data portion in each segment."</li>
+  <li>For overhead %, show <b>overhead bytes</b> and <b>total frame bytes</b> separately before dividing.</li>
+  <li>If frame size changes, reuse the <b>same MSS formula</b> — don't restart your logic; just show old vs new side-by-side.</li>
+  <li>For "which layer/device" questions, use the 3-row table (Host / Router / Switch) from Core Concepts above — examiners want the <i>reasoning</i> ("routers read L3 to route"), not just names.</li>
+  <li>Draw the small encapsulation staircase (M → Ht|M → Hn|Ht|M → Hl|Hn|Ht|M) whenever "illustrate/diagram" is asked — 1 minute of drawing for guaranteed marks.</li>
+</ul>
+
+<div class="divider"></div>
+
+<!-- ================= PART 2 : HTTP MATH ================= -->
+<h2 class="section-title" id="http-concepts"><span class="num">2</span>HTTP Math — Core Concepts</h2>
+
+<h3>RTT and Response Time <span class="chip">Slide 2-16, 2-17</span></h3>
+<p><b>RTT</b> (Round-Trip Time): time for a small packet to travel from client to server and back. <b>FTT</b> (File Transmission Time): time to push all bits of one object onto the link = File Size ÷ Bandwidth.</p>
+
+<h3>Non-Persistent vs Persistent HTTP <span class="chip">Slide 2-13, 2-17</span></h3>
+<table>
+<tr><th>Type</th><th>Behaviour</th><th>Cost per object</th></tr>
+<tr><td><b>Non-persistent</b></td><td>New TCP connection for every single object; connection closed after each object</td><td>1 RTT (TCP handshake) + 1 RTT (HTTP req/resp) + FTT = <b>2RTT + FTT</b></td>
+</tr>
+<tr><td><b>Persistent, no pipelining</b></td><td>One TCP connection stays open; but client waits for each response before requesting the next object</td><td>1 RTT (HTTP req/resp only, connection already open) + FTT = <b>RTT + FTT</b>, plus 1 RTT once for the initial handshake</td>
+</tr>
+<tr><td><b>Persistent, with pipelining</b></td><td>Client fires off all requests back-to-back without waiting for each response</td><td>Only 1 RTT total is needed to request <i>all</i> the remaining objects — you then just pay their FTTs one after another</td>
+</tr>
+</table>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="http-formulas"><span class="num">2.2</span>Formula Toolkit — General n-Object Page</h2>
+<p>Let the page = 1 base HTML file + <span class="var">(n−1)</span> embedded objects (all on the same server), n objects total.</p>
+
+<div class="formula-box">
+<div class="label">① Non-persistent, no parallel connections</div>
+<div class="formula">Total = n × (2RTT + FTT) &nbsp;&nbsp;<i>(if all objects are the same size)</i><br>
+or Σ (2RTT + FTT<sub>i</sub>) for each object individually if sizes differ</div>
+</div>
+<div class="formula-box">
+<div class="label">② Non-persistent, m parallel connections</div>
+<div class="formula">Total = (2RTT + FTT<sub>html</sub>) &nbsp;+&nbsp; ⌈(n−1)/m⌉ rounds × (2RTT + FTT<sub>obj</sub>)</div>
+</div>
+<div class="formula-box">
+<div class="label">③ Persistent, no pipelining</div>
+<div class="formula">Total = 1RTT (handshake) &nbsp;+&nbsp; n × (1RTT + FTT<sub>i</sub>) &nbsp;&nbsp;<i>(request objects one at a time, sequentially)</i></div>
+</div>
+<div class="formula-box">
+<div class="label">④ Persistent, with pipelining</div>
+<div class="formula">Total = 1RTT (handshake) &nbsp;+&nbsp; (1RTT + FTT<sub>html</sub>) &nbsp;+&nbsp; (1RTT + Σ FTT<sub>obj</sub>) &nbsp;&nbsp;<i>(all remaining objects requested in one burst)</i></div>
+</div>
+
+<div class="assume"><div class="label">⚠ When the question just says "Persistent HTTP" with no mention of pipelining</div>
+Default to formula ③ (no pipelining) — that's the base behaviour of HTTP/1.1 persistent connections. Only use ④ if the question explicitly says "with pipelining."</div>
+
+<div class="divider"></div>
+
+<h3>Solved Problems</h3>
+
+<div class="problem" id="http-p1">
+<div class="phead"><span class="ptitle">Base HTML + 30 embedded images (reference example)</span><span class="psrc">Workbook Ch.2 · Section 2.2 worked example</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> 1 base HTML file + 30 images = 31 objects total, all same server.</div>
+<table>
+<tr><th>Case</th><th>Formula reasoning</th><th>Result</th></tr>
+<tr><td>(i) Non-persistent, no parallel</td><td>31 objects sequentially, each 2RTT+FTT</td><td><b>62 RTT + 31 FTT</b></td></tr>
+<tr><td>(ii) Non-persistent, 10 parallel</td><td>HTML first (2RTT+FTT), then 30 images in 3 rounds of 10: 3×(2RTT+FTT)</td><td><b>8 RTT + 4 FTT</b></td></tr>
+<tr><td>(iii) Persistent, no pipelining</td><td>1RTT handshake + 31×(1RTT+FTT)</td><td><b>32 RTT + 31 FTT</b></td></tr>
+<tr><td>(iv) Persistent, with pipelining</td><td>1RTT handshake + (1RTT+FTT for html) + (1RTT + 30FTT for images, one burst)</td><td><b>3 RTT + 31 FTT</b></td></tr>
+</table>
+<div class="answer">Use this table as your reference template — every HTTP-math question is a variation of these 4 rows.</div>
+</div>
+</div>
+
+<div class="problem" id="http-p2">
+<div class="phead"><span class="ptitle">50 Mbps link, RTT=100ms, HTML=7 Kbit + 5 images × 2.5 Kbit</span><span class="psrc">Workbook Ch.2 · Knowledge Test #2, Q5</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> 6 objects total (1 html + 5 images). Link = 50 Mbps. RTT = 100 ms (includes propagation+processing+queueing). GET-message transmit time ≈ 0. Must include 1 RTT for TCP setup.</div>
+<div class="step"><span class="stepnum">Step 0 — Compute FTTs first</span><br>
+FTT<sub>html</sub> = 7,000 bits ÷ 50,000,000 bps = <b>0.14 ms</b><br>
+FTT<sub>img</sub> = 2,500 bits ÷ 50,000,000 bps = <b>0.05 ms</b> (each image)</div>
+<div class="step"><span class="stepnum">(a) One non-persistent connection</span><br>
+(2RTT+FTT<sub>html</sub>) + 5×(2RTT+FTT<sub>img</sub>) = (200+0.14) + 5×(200+0.05)<br>= 200.14 + 1000.25 = <b>1200.39 ms ≈ 1.2 s</b></div>
+<div class="step"><span class="stepnum">(b) Non-persistent, 2 parallel connections</span><br>
+HTML first (200.14ms), then 5 images in ⌈5/2⌉=3 rounds: 3×(200+0.05) = 600.15ms<br>
+Total = 200.14 + 600.15 = <b>800.29 ms ≈ 0.8 s</b></div>
+<div class="step"><span class="stepnum">(c) Persistent, no pipelining</span><br>
+1RTT + (1RTT+FTT<sub>html</sub>) + 5×(1RTT+FTT<sub>img</sub>) = 100 + 100.14 + 5×100.05<br>
+= 100 + 100.14 + 500.25 = <b>700.39 ms ≈ 0.7 s</b></div>
+<div class="step"><span class="stepnum">(d) Persistent, with pipelining</span><br>
+1RTT + (1RTT+FTT<sub>html</sub>) + (1RTT + 5×FTT<sub>img</sub>) = 100 + 100.14 + (100+0.25)<br>
+= 100 + 100.14 + 100.25 = <b>300.39 ms ≈ 0.3 s</b></div>
+<div class="step"><span class="stepnum">(e) Are non-persistent connections ever preferable?</span><br>
+Yes — e.g. when objects are spread across <i>different</i> servers (persistent doesn't help since a new connection is needed per server anyway), or when a server needs to limit the number of simultaneously-open idle connections to serve many clients, or for simple stateless server designs.</div>
+<div class="answer">a) 1200.39ms &nbsp; b) 800.29ms &nbsp; c) 700.39ms &nbsp; d) 300.39ms
+<span class="small">Notice the clear ranking: non-persistent (worst) → parallel → persistent → persistent+pipelining (best). This ordering is itself a common short-answer question.</span></div>
+</div>
+</div>
+
+<div class="problem" id="http-p3">
+<div class="phead"><span class="ptitle">1 Gbps link: HTML + 2 CSS + 8 images</span><span class="psrc">Midterm Spring 2026 · Q2(b)</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> 1 HTML (100KB) + 2 CSS (150KB each) + 8 images (2MB each) = 11 objects. Bandwidth = 1 Gbps. RTT (connection setup) = 0.2 ms — applied uniformly to every round trip.</div>
+<div class="step"><span class="stepnum">Step 1 — FTT for each object type</span><br>
+FTT<sub>html</sub> = 100,000×8 ÷ 10⁹ = <b>0.8 ms</b><br>
+FTT<sub>css</sub> = 150,000×8 ÷ 10⁹ = <b>1.2 ms</b> (×2 files)<br>
+FTT<sub>img</sub> = 2,000,000×8 ÷ 10⁹ = <b>16 ms</b> (×8 files)</div>
+<div class="step"><span class="stepnum">Step 2 — Non-persistent HTTP</span><br>
+Total = (2×0.2+0.8) + 2×(2×0.2+1.2) + 8×(2×0.2+16)<br>
+= 1.2 + 2×1.6 + 8×16.4 = 1.2 + 3.2 + 131.2 = <b>135.6 ms</b></div>
+<div class="step"><span class="stepnum">Step 3 — Persistent HTTP (no pipelining)</span><br>
+Total = 1×0.2(handshake) + (0.2+0.8) + 2×(0.2+1.2) + 8×(0.2+16)<br>
+= 0.2 + 1.0 + 2.8 + 129.6 = <b>133.6 ms</b></div>
+<div class="answer">Non-persistent = 135.6 ms &nbsp;|&nbsp; Persistent = 133.6 ms
+<span class="small">Notice the gap is small (only 2ms) — because with a 1Gbps link the images' FTT (16ms each) totally dominates over the tiny RTT savings (0.2ms each). This is a great point to mention for "why is persistent HTTP not always dramatically faster" style follow-ups.</span></div>
+</div>
+</div>
+
+<div class="problem" id="http-p4">
+<div class="phead"><span class="ptitle">8 small objects, RTT=0.8s, 500 Kbps throughput</span><span class="psrc">Midterm Fall 2025 · Q2(b)</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> Base HTML + 8 referenced objects = 9 objects total, each 100 Kbytes. RTT = 0.8 s. Throughput = 500 Kbps.</div>
+<div class="step"><span class="stepnum">Step 1 — FTT per object</span><br>
+FTT = 100,000×8 bits ÷ 500,000 bps = 800,000 ÷ 500,000 = <b>1.6 s</b></div>
+<div class="step"><span class="stepnum">Step 2 — Non-persistent HTTP</span><br>
+9 × (2RTT + FTT) = 9 × (1.6+1.6) = 9 × 3.2 = <b>28.8 s</b></div>
+<div class="step"><span class="stepnum">Step 3 — Persistent HTTP (no pipelining)</span><br>
+1RTT + 9×(RTT+FTT) = 0.8 + 9×(0.8+1.6) = 0.8 + 9×2.4 = 0.8+21.6 = <b>22.4 s</b></div>
+<div class="answer">Non-persistent = 28.8 s &nbsp;|&nbsp; Persistent = 22.4 s
+<span class="small">Bonus (only if "pipelining" is explicitly asked): Persistent+pipelining = RTT + (RTT+FTT) + (RTT+8×FTT) = 0.8+2.4+13.6 = <b>16.8 s</b>.</span></div>
+</div>
+</div>
+
+<div class="problem" id="http-p5">
+<div class="phead"><span class="ptitle">Symbolic form: base page + 4 images (in terms of T1, T2, T3)</span><span class="psrc">Midterm Summer 2025 · Q3(a)</span></div>
+<div class="pbody">
+<div class="given"><b>Given:</b> T1 = time to establish a TCP connection. T2 = time to retrieve the base page. T3 = time to retrieve each image. 4 embedded images. Ignore connection-close time and GET-packet transmit time.</div>
+<div class="step"><span class="stepnum">Non-persistent HTTP</span><br>
+Base page needs its own connection: (T1+T2). Each of the 4 images needs a brand-new connection: 4×(T1+T3).<br>
+Total = T1+T2+4(T1+T3) = <b>5T1 + T2 + 4T3</b></div>
+<div class="step"><span class="stepnum">Persistent HTTP</span><br>
+Only ONE connection is opened for everything: T1 (once) + T2 (base page) + 4×T3 (images, reusing the same connection).<br>
+Total = <b>T1 + T2 + 4T3</b></div>
+<div class="answer">Non-persistent = 5T1+T2+4T3 &nbsp;|&nbsp; Persistent = T1+T2+4T3
+<span class="small">The difference is exactly 4T1 — the connection-setup time saved by NOT re-opening TCP for each of the 4 images. This "difference = (n−1)×T1" pattern is a fast sanity check for any symbolic HTTP question.</span></div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="http-pitfalls"><span class="num">2.4</span>Common Pitfalls — HTTP Math</h2>
+<div class="pitfall"><div class="label">⚠ Pitfall 1 — Forgetting the base HTML file itself</div>
+"A page references 8 objects" often means <b>9 total fetches</b> (base HTML + 8 objects), not 8. Read carefully whether the stated size/count already includes the base file.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 2 — Reusing RTT for both handshake and request/response</div>
+Unless two separate RTT values are given, the SAME RTT number is used for the TCP handshake round trip AND every HTTP request/response round trip — don't invent a second, different value.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 3 — Non-persistent ≠ automatically sequential</div>
+If the question says "n parallel TCP connections," you must use formula ② (round-based), not formula ①. Rounds = ⌈objects ÷ parallel connections⌉.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 4 — Persistent "no pipelining" still pays 1 RTT per object</div>
+A common mistake is assuming persistent HTTP means "no extra RTT at all." It still needs 1RTT+FTT <i>per object</i> (just skips the second RTT for a fresh TCP handshake) — only <b>pipelining</b> collapses multiple objects into a single shared RTT.</div>
+<div class="pitfall"><div class="label">⚠ Pitfall 5 — bits vs bytes in bandwidth division</div>
+Object sizes are usually given in Bytes/Kbytes/MB, but link speed is in bits/sec (Mbps/Gbps/Kbps). Always convert size to <b>bits</b> (×8) before dividing by the bandwidth in bps.</div>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="http-checklist"><span class="num">2.5</span>Full-Marks Answer Checklist — HTTP Math Questions</h2>
+<ul class="checklist">
+  <li>Count objects correctly — check if the base HTML file is separate from or included in the stated "n objects."</li>
+  <li>Compute <b>every FTT explicitly</b> (show the bits÷bps division) before plugging into any formula.</li>
+  <li>Write the <b>general formula symbolically first</b> (e.g. "n×(2RTT+FTT)"), then substitute numbers — partial marks are given for the correct formula even with an arithmetic slip.</li>
+  <li>Draw the simple client–server ladder diagram with RTT arrows whenever "sequence diagram" or "illustrate" is requested.</li>
+  <li>State units clearly on your final answer (ms vs s) — a numerically correct but mislabeled answer often loses a mark.</li>
+  <li>If asked to compare non-persistent vs persistent, always add one line of interpretation (e.g. "persistent saves n RTTs of connection setup").</li>
+</ul>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="cheatsheet"><span class="num">📋</span>One-Page Cheat Sheet</h2>
+<div class="grid2">
+<div class="card">
+<h4>Encapsulation</h4>
+<p>MSS = MaxIPpacket − 20(IP) − 20(TCP)<br>
+Segments = ⌈data ÷ MSS⌉<br>
+Overhead% = (DLH+DLT+IPH+TH) ÷ FullFrame × 100<br>
+PDU latency: T = (H+k−1)×P<br>
+Router: L1-L2-L3 &nbsp;|&nbsp; Switch: L1-L2 &nbsp;|&nbsp; Host: L1-L5</p>
+</div>
+<div class="card">
+<h4>HTTP Math</h4>
+<p>FTT = size(bits) ÷ bandwidth(bps)<br>
+Non-persistent = n×(2RTT+FTT)<br>
+Persistent (no pipe) = RTT + n×(RTT+FTT)<br>
+Persistent + pipeline = RTT+(RTT+FTT<sub>html</sub>)+(RTT+ΣFTT<sub>obj</sub>)<br>
+m-parallel: rounds = ⌈(n−1)/m⌉</p>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<h2 class="section-title" id="gaps"><span class="num">❓</span>What This Guide Deliberately Doesn't Cover</h2>
+<p>You asked specifically for <b>Encapsulation</b> and <b>HTTP Math</b>, so this guide stays scoped to those. Your slides and midterms also contain substantial math in these related areas that aren't included here:</p>
+<ul>
+  <li><b>Circuit vs. packet switching + probability</b> (Binomial probability of N users active, e.g. Spring'26 Q1a, workbook Ex.5/6)</li>
+  <li><b>End-to-end delay &amp; throughput / bottleneck link</b> (transmission+propagation+queueing+processing delay, e.g. Spring'26 Q1d, Summer'25 Q1b, workbook Ex.7-10)</li>
+  <li><b>DNS iterative vs recursive query tracing</b> (all 3 midterms' Q2e/Q3, workbook Sec 2.5)</li>
+  <li><b>CIA triad, cryptography, digital signatures</b> (Fall'25 Q2c, Summer'25 Q2c)</li>
+  <li><b>Sockets &amp; port-based demultiplexing</b> (Summer'25 Q2b)</li>
+</ul>
+<p>Just say the word and I'll build a matching full-marks guide for any of these — same style, same solve-everything approach.</p>
+
+<footer>
+  Built for Tanvir · CSE 3711 Computer Networks, UIU · Sourced only from your uploaded slides, workbooks (Mohammad MamunElahi, CSE 323/3711), and Spring'26/Fall'25/Summer'25 midterm papers.
+</footer>
+
+</main>
+</div>
+
+<script>
+// scroll progress
+const bar = document.getElementById('progress');
+window.addEventListener('scroll', ()=>{
+  const h = document.documentElement;
+  const pct = (h.scrollTop)/(h.scrollHeight-h.clientHeight)*100;
+  bar.style.width = pct+'%';
+});
+// active TOC link highlighting
+const links = document.querySelectorAll('#toc nav a');
+const targets = Array.from(links).map(a=>document.querySelector(a.getAttribute('href'))).filter(Boolean);
+window.addEventListener('scroll', ()=>{
+  let current = 0;
+  targets.forEach((t,i)=>{ if(t && t.getBoundingClientRect().top < 140) current = i; });
+  links.forEach(l=>l.classList.remove('active'));
+  if(links[current]) links[current].classList.add('active');
+});
+</script>
+</body>
+</html>
